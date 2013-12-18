@@ -21,7 +21,7 @@
 
 set -e
 
-echo "[+] creating dir target on $PWD/target"
+echo "[I] creating dir target on $PWD/target"
 mkdir -p target
-echo "[+] Downloading base system into $PWD/target/ dir..."
+echo "[I] Downloading base system into $PWD/target/ dir..."
 multistrap -a armhf -d target -f config/multistrap.conf

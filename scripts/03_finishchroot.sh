@@ -19,25 +19,6 @@
 #
 ############################################################################
 
-echo -e "\n\n PiNAS builder  Copyright (C) 2013  J.A. Nache <ja@nache.net>"
-echo " This program comes with ABSOLUTELY NO WARRANTY; for details type 'show w'."
-echo " This is free software, and you are welcome to redistribute it"
-echo -e " under certain conditions; type 'show c' for details.\n\n"
+set -e
 
-function msg_and_quit {
-        echo "[E] An ERROR ocurred, Build aborted"
-	for script in "scriptspost"/*
-	do
-		if [[ -x "$script" ]]; then
-		        "$script"
-	        fi
-	done
-        exit 1
-}
-
-for script in "scripts"/*
-do
-if [[ -x "$script" ]]; then
-	"$script" || msg_and_quit
-	fi
-done
+umount $PWD/target/proc
