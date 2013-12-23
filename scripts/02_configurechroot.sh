@@ -22,5 +22,9 @@
 set -e
 
 echo "[I] Configuring packages into chroot env..."
+
+DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
+ LC_ALL=C LANGUAGE=C LANG=C chroot $PWD/target /var/lib/dpkg/info/dash.preinst install
+
 DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
  LC_ALL=C LANGUAGE=C LANG=C chroot $PWD/target dpkg --configure -a

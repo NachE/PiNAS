@@ -20,13 +20,13 @@
 ############################################################################
 
 echo -e "\n\n PiNAS builder  Copyright (C) 2013  J.A. Nache <ja@nache.net>"
-echo " This program comes with ABSOLUTELY NO WARRANTY; for details type 'show w'."
+echo " This program comes with ABSOLUTELY NO WARRANTY."
 echo " This is free software, and you are welcome to redistribute it"
-echo -e " under certain conditions; type 'show c' for details.\n\n"
+echo -e " under certain conditions. See LICENSE for more details.\n\n"
 
 function msg_and_quit {
         echo "[E] An ERROR ocurred, Build aborted"
-	for script in "scriptspost"/*
+	for script in "scriptsend"/*
 	do
 		if [[ -x "$script" ]]; then
 		        "$script"
@@ -41,3 +41,10 @@ if [[ -x "$script" ]]; then
 	"$script" || msg_and_quit
 	fi
 done
+
+for script in "scriptsend"/*
+	do
+		if [[ -x "$script" ]]; then
+			"$script"
+		fi
+	done
