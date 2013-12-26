@@ -40,6 +40,7 @@ echo "#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 echo "#                                                                            #
 echo "##############################################################################
 
+echo "Loading PiNAS..."
 mount -t proc -o nodev,noexec,nosuid proc /proc
 mount -t sysfs -o nodev,noexec,nosuid sysfs /sys
 
@@ -72,7 +73,7 @@ rootmnt="/target
 for i in $(cat /proc/cmdline); do
 	case $i in
 		root\=*)
-			root=$(get_opt $i)
+			rootmnt=$(get_opt $i)
 			;;
 		init\=*)
 			init=$(get_opt $i)
@@ -86,7 +87,7 @@ mount "${rootmnt}" /target
 mount -n -o move /sys ${rootmnt}/sys
 mount -n -o move /proc ${rootmnt}/proc
 
-busybox switch_root /target "${init}"
 exec busybox switch_root ${rootmnt} ${init} "$@" <${rootmnt}/dev/console >${rootmnt}/dev/console
+busybox switch_root /target "${init}"
 
 echo "[E] Error in switching from initrd to root fs"
