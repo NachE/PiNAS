@@ -25,7 +25,13 @@ echo " This is free software, and you are welcome to redistribute it"
 echo -e " under certain conditions. See LICENSE for more details.\n\n"
 
 function msg_and_quit {
-        echo "[E] An ERROR ocurred, Build aborted"
+	echo "**************************************"
+	echo "**************************************"
+	echo "*************** ERROR*****************"
+	echo "**************************************"
+	echo "**************************************"
+	echo "[E] An ERROR ocurred, Build aborted"
+
 	for script in "scriptsend"/*
 	do
 		if [[ -x "$script" ]]; then

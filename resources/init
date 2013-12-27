@@ -62,7 +62,6 @@ mount -t devpts -o noexec,nosuid,gid=5,mode=0620 devpts /dev/pts || true
 mount -t tmpfs -o "nosuid,size=20%,mode=0755" tmpfs /run
 mkdir -m 0755 /run/initramfs
 
-
 get_opt() {
 	echo "$@" | cut -d "=" -f 2
 }

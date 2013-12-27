@@ -23,11 +23,16 @@ set -e
 
 ORIG=$PWD
 
+if [ ! -d raspberrypi/ ];then
+	mkdir raspberrypi
+fi
 cd raspberrypi/
 
 if [ -d $PWD/tools ];then
 	echo "[I] Updating compiler..."
-	git -C $PWD/tools pull
+	cd $PWD/tools
+	git pull
+	cd - >/dev/null
 else
 	echo "[I] Cloning compiler..."
 	git clone https://github.com/raspberrypi/tools.git
@@ -36,7 +41,9 @@ fi
 
 if [ -d $PWD/linux ];then
 	echo "[I] Updating linux kernel source ..."
-	git -C $PWD/linux pull
+	cd $PWD/linux
+	git pull
+	cd - >/dev/null
 else
 	echo "[I] Cloning linux kernel source..."
 	git clone https://github.com/raspberrypi/linux.git
@@ -49,6 +56,10 @@ make mrproper
 echo "[I] Using config arch/arm/configs/bcmrpi_defconfig"
 cp arch/arm/configs/bcmrpi_defconfig ./.config
 
+EXTVER=-PiNAS-`date +%Y%m%d%H%M`
+echo "[I] Seting extraversion $EXTVER"
+sed -i -e "s/^EXTRAVERSION =.*/EXTRAVERSION = $EXTVER/" Makefile
+
 echo "[I] Making config..."
 make ARCH=arm CROSS_COMPILE=${CCPREFIX} olddefconfig
 #diff .config arch/arm/configs/bcmrpi_defconfig
@@ -60,11 +71,15 @@ make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX}
 echo "[I] Compiling Modules..."
 make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} modules
 
+if [ ! -d ../compiled ];then
+	mkdir ../compiled
+fi
+
 echo "[I] Building modules dir..."
 MODULES_TEMP=../compiled/modules
 make ARCH=arm CROSS_COMPILE=${CCPREFIX} INSTALL_MOD_PATH=${MODULES_TEMP} modules_install
 
 echo "[I] Copying Kernel image..."
-cp arch/arm/boot/zImage ../compiled/kernel.img
+cp arch/arm/boot/Image ../compiled/kernel.img
 
 cd $ORIG
