@@ -29,3 +29,4 @@ PINAS_KERNEL_VERSION=$(ls $PWD/target/lib/modules | tail -n 1)
 
 DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
  LC_ALL=C LANGUAGE=C LANG=C chroot $PWD/target mkinitramfs -o /initrd.gz $PINAS_KERNEL_VERSION
+mv $PWD/target/initrd.gz $PWD/

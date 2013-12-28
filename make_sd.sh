@@ -29,6 +29,9 @@ if [ -z $1 ];then
 	echo -e "\n  Usage: $0 <disk>\n\n"
 	exit 1
 fi
+SD_DISK=$1
+SD_DISK1="$(SD_DISK)1"
+SD_DISK2="$(SD_DISK)2"
 
 function msg_and_quit {
 	echo "**************************************"
@@ -41,21 +44,30 @@ function msg_and_quit {
 }
 
 function part_sd {
-	parted -s "$DISK" mklabel msdos
-	parted -s "$DISK" unit cyl mkpart primary fat32 -- 0 16
-	parted -s "$DISK" unit cyl mkpart primary ext2 -- 16 -2
-	parted -s "$DISK" set 1 boot on
+	echo "[I] Erasing disk $SD_DISK..."
+	parted -s $SD_DISK mklabel msdos
+	echo "[I] Making $SD_DISK 1..."
+	parted -s $SD_DISK unit cyl mkpart primary fat32 -- 0 16
+	echo "[I] Making $SD_DISK 2..."
+	parted -s $SD_DISK unit cyl mkpart primary ext2 -- 16 -2
+	echo "[I] Making disk bootable..."
+	parted -s $SD_DISK set 1 boot on
 
 
 #here we mount parts and copy files
 
-	MOUNTSD=$PWD/rootmount
+	if [ ! -d $PWD/rootmount ];then
+		mkdir rootmount
+	fi
 
-	echo "boot=/dev/mmcblk0p1 disk=/dev/mmcblk0p2" > $MOUNTSD/cmdline.txt
+	MOUNTEDSD=$PWD/rootmount
+	mount $SD_DISK1 $PWD/rootmount
 
-	echo "initramfs initrd.gz" >> $MOUNTSD/cmdline.txt
-
-
+	echo "boot=/dev/mmcblk0p1 disk=/dev/mmcblk0p2" > $MOUNTEDSD/cmdline.txt
+	echo "initramfs initrd.gz" >> $MOUNTEDSD/config.txt
+	cp $PWD/rootfs.sqsh $MOUNTEDSD/
+	cp $PWD/raspberrypi/compiled/kernel.img $MOUNTEDSD/
+	cp $PWD/initrd.gz $MOUNTEDSD
 }
 
 part_sd || msg_and_quit
