@@ -57,7 +57,7 @@ mount -t devpts -o noexec,nosuid,gid=5,mode=0620 devpts /dev/pts || true
 mount -t tmpfs -o "nosuid,size=20%,mode=0755" tmpfs /run
 mkdir -m 0755 /run/initramfs
 #mkdir /media/
-mount -o ro /dev/mmcblk0p1 /media
+mount -r /dev/mmcblk0p1 /media
 
 get_opt() {
 	echo "$@" | cut -d "=" -f 2
@@ -65,6 +65,7 @@ get_opt() {
 
 NEWINI="/sbin/init"
 ROOTMNT="/target"
+[ -d /target ] || mkdir /target
 
 for i in $(cat /proc/cmdline); do
 	case $i in
@@ -79,13 +80,16 @@ done
 
 #Here we mount squaskfs root on /target
 echo "[I] mounting squashfs..."
-mount -o loop -t squashfs /media/rootfs.sqfs $ROOTMNT
+
+/bin/busybox losetup /dev/loop0 /media/rootfs.sqfs
+mount -r -t squashfs -o noatime /dev/loop0 $ROOTMNT
 
 mount -n -o move /sys $ROOTMNT/sys
 mount -n -o move /proc $ROOTMNT/proc
 
 echo "[I] Switching to root..."
-exec busybox switch_root $ROOTMNT $NEWINIT "$@" <$ROOTMNT/dev/console >$ROOTMNT/dev/console
-busybox switch_root $ROOTMNT $NEWINIT
+#busybox switch_root $ROOTMNT $NEWINIT "$@" <$ROOTMNT/dev/console >$ROOTMNT/dev/console
+/bin/busybox switch_root $ROOTMNT $NEWINIT
 
-echo "[E] Error switching to squashfs root"
+echo "[E] Error switching to squashfs root. I give you a shell."
+/bin/busybox sh
