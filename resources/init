@@ -1,22 +1,24 @@
 #!/bin/sh
 
-[ -d /dev ] || mkdir -m 0755 /dev
-[ -d /root ] || mkdir -m 0700 /root
-[ -d /sys ] || mkdir /sys
-[ -d /proc ] || mkdir /proc
-[ -d /tmp ] || mkdir /tmp
-mkdir -p /var/lock
-mount -t sysfs -o nodev,noexec,nosuid sysfs /sys
-mount -t proc -o nodev,noexec,nosuid proc /proc
+[ -d /dev ] || /bin/busybox mkdir -m 0755 /dev
+[ -d /root ] || /bin/busybox mkdir -m 0700 /root
+[ -d /sys ] || /bin/busybox mkdir /sys
+[ -d /proc ] || /bin/busybox mkdir /proc
+[ -d /tmp ] || /bin/busybox mkdir /tmp
+/bin/busybox mkdir -p /var/lock
+/bin/busybox mount -t sysfs -o nodev,noexec,nosuid sysfs /sys
+/bin/busybox mount -t proc -o nodev,noexec,nosuid proc /proc
 
-busybox ln -s /proc/self/fd/0 /dev/stdin
-busybox ln -s /proc/self/fd/1 /dev/stdout
-busybox ln -s /proc/self/fd/2 /dev/stderr
+/bin/busybox ln -s /proc/self/fd/0 /dev/stdin
+/bin/busybox ln -s /proc/self/fd/1 /dev/stdout
+/bin/busybox ln -s /proc/self/fd/2 /dev/stderr
 
-echo "##############################################################################"
-echo "#                                                                            #"
-echo "#    PiNAS GNU/Linux                                                         #"
-echo "#    Copyright (C) 2013 Juan Antonio Nache <ja@nache.net>                    #"
+export PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin
+
+/bin/busybox echo "##############################################################################"
+/bin/busybox echo "#                                                                            #"
+/bin/busybox echo "#    PiNAS GNU/Linux                                                         #"
+/bin/busybox echo "#    Copyright (C) 2013 Juan Antonio Nache <ja@nache.net>                    #"
 echo "#                                                                            #"
 echo "#    This program is free software: you can redistribute it and/or modify    #"
 echo "#    it under the terms of the GNU General Public License as published by    #"
