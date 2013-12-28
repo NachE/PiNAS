@@ -26,7 +26,7 @@ boot:
 	scripts/06_get_boot.sh
 
 help:
-	@echo  '  all             - Exec build_pinas.sh
+	@echo  '  all             - Exec build_pinas.sh'
 	@echo  '  base            - Download base debian system'
 	@echo  '  upchroot        - Mount proc, sys, etc and leave target to be used'
 	@echo  '  downchroot      - Umount proc, sys, etc from target'
