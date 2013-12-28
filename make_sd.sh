@@ -29,9 +29,9 @@ if [ -z $1 ];then
 	echo -e "\n  Usage: $0 <disk>\n\n"
 	exit 1
 fi
-SD_DISK=$1
-SD_DISK1="$(SD_DISK)1"
-SD_DISK2="$(SD_DISK)2"
+export SD_DISK=$1
+SD_DISK1=$SD_DISK"1"
+SD_DISK2=$SD_DISK"2"
 
 function msg_and_quit {
 	echo "**************************************"
@@ -49,21 +49,21 @@ if [ ! -d $PWD/raspberrypi ];then
 	mkdir $PWD/raspberrypi
 fi
 
-if [ -d $PWD/raspberrypi/boot ];then
+if [ -d $PWD/raspberrypi/firmware ];then
 	echo "[I] Updating boot files..."
-	cd $PWD/raspberrypi/boot
+	cd $PWD/raspberrypi/firmware
 	git pull
 	cd - >/dev/null
 else
 	echo "[I] Cloning boot files from repo..."
 	cd $PWD/raspberrypi
-	git clone https://github.com/raspberrypi/firmware/tree/next/boot
+	git clone https://github.com/raspberrypi/firmware
 	cd - >/dev/null
 fi
 
 echo "[I] Deleting precompiled kernel from repo..."
-rm -rf $PWD/raspberrypi/boot/kernel.img
-rm -rf $PWD/raspberrypi/boot/kernel_emergency.img
+rm -rf $PWD/raspberrypi/firmware/boot/kernel.img
+rm -rf $PWD/raspberrypi/firmware/boot/kernel_emergency.img
 
 	echo "[I] Erasing disk $SD_DISK..."
 	parted -s $SD_DISK mklabel msdos
@@ -74,6 +74,10 @@ rm -rf $PWD/raspberrypi/boot/kernel_emergency.img
 	echo "[I] Making disk bootable..."
 	parted -s $SD_DISK set 1 boot on
 
+	echo "[I] Formating $SD_DISK1..."
+	mkfs.vfat $SD_DISK1
+	echo "[I] Formating $SD_DISK2..."
+	mkfs.ext4 $SD_DISK2
 
 #here we mount parts and copy files
 
@@ -86,7 +90,7 @@ rm -rf $PWD/raspberrypi/boot/kernel_emergency.img
 	mount $SD_DISK1 $PWD/rootmount
 
 	echo "[I] Copying files into SD CARD..."
-	cp -r $PWD/raspberrypi/boot/* $MOUNTEDSD/
+	cp -r $PWD/raspberrypi/firmware/boot/* $MOUNTEDSD/
 	echo "boot=/dev/mmcblk0p1 disk=/dev/mmcblk0p2" > $MOUNTEDSD/cmdline.txt
 	echo "initramfs initrd.gz" >> $MOUNTEDSD/config.txt
 	cp $PWD/rootfs.sqsh $MOUNTEDSD/
@@ -95,3 +99,4 @@ rm -rf $PWD/raspberrypi/boot/kernel_emergency.img
 }
 
 build_sd || msg_and_quit
+umount $MOUNTEDSD

@@ -21,19 +21,18 @@
 
 set -e
 
-ORIG=$PWD
-
-if [ ! -d raspberrypi/ ];then
-	mkdir raspberrypi
+if [ ! -d $PWD/raspberrypi ];then
+	mkdir $PWD/raspberrypi
 fi
-cd raspberrypi/
 
-if [ -d $PWD/boot ];then
+if [ -d $PWD/raspberrypi/firmware ];then
 	echo "[I] Updating boot files..."
-	cd $PWD/boot
+	cd $PWD/raspberrypi/firmware
 	git pull
 	cd - >/dev/null
 else
-	echo "[I] Cloning boot files..."
-	git clone https://github.com/raspberrypi/tools.git
+	echo "[I] Cloning boot files from repo..."
+	cd $PWD/raspberrypi
+	git clone https://github.com/raspberrypi/firmware
+	cd - >/dev/null
 fi
