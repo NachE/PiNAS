@@ -43,7 +43,28 @@ function msg_and_quit {
         exit 1
 }
 
-function part_sd {
+function build_sd {
+
+if [ ! -d $PWD/raspberrypi ];then
+	mkdir $PWD/raspberrypi
+fi
+
+if [ -d $PWD/raspberrypi/boot ];then
+	echo "[I] Updating boot files..."
+	cd $PWD/raspberrypi/boot
+	git pull
+	cd - >/dev/null
+else
+	echo "[I] Cloning boot files from repo..."
+	cd $PWD/raspberrypi
+	git clone https://github.com/raspberrypi/firmware/tree/next/boot
+	cd - >/dev/null
+fi
+
+echo "[I] Deleting precompiled kernel from repo..."
+rm -rf $PWD/raspberrypi/boot/kernel.img
+rm -rf $PWD/raspberrypi/boot/kernel_emergency.img
+
 	echo "[I] Erasing disk $SD_DISK..."
 	parted -s $SD_DISK mklabel msdos
 	echo "[I] Making $SD_DISK 1..."
@@ -56,6 +77,7 @@ function part_sd {
 
 #here we mount parts and copy files
 
+	echo "[I] Mounting SD CARD into $PWD/rootmount..."
 	if [ ! -d $PWD/rootmount ];then
 		mkdir rootmount
 	fi
@@ -63,6 +85,8 @@ function part_sd {
 	MOUNTEDSD=$PWD/rootmount
 	mount $SD_DISK1 $PWD/rootmount
 
+	echo "[I] Copying files into SD CARD..."
+	cp -r $PWD/raspberrypi/boot/* $MOUNTEDSD/
 	echo "boot=/dev/mmcblk0p1 disk=/dev/mmcblk0p2" > $MOUNTEDSD/cmdline.txt
 	echo "initramfs initrd.gz" >> $MOUNTEDSD/config.txt
 	cp $PWD/rootfs.sqsh $MOUNTEDSD/
@@ -70,4 +94,4 @@ function part_sd {
 	cp $PWD/initrd.gz $MOUNTEDSD
 }
 
-part_sd || msg_and_quit
+build_sd || msg_and_quit
