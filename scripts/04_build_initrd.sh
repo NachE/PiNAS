@@ -23,10 +23,23 @@ set -e
 
 echo "[I] Building initrd.gz..."
 
-cp resources/init target/usr/share/initramfs-tools/init
-chmod a+x target/usr/share/initramfs-tools/init
-PINAS_KERNEL_VERSION=$(ls $PWD/target/lib/modules | tail -n 1)
+[ -d $PWD/initramfs ] || mkdir $PWD/initramfs
+mkdir -p $PWD/initramfs/{bin,sbin,etc,proc,sys,dev,tmp,run,root,media,var,lib}
+mkdir -p $PWD/initramfs/usr/{bin,sbin}
+chmod 777 $PWD/initramfs/tmp
 
-DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true \
- LC_ALL=C LANGUAGE=C LANG=C chroot $PWD/target mkinitramfs -o /initrd.gz $PINAS_KERNEL_VERSION
-mv $PWD/target/initrd.gz $PWD/
+rm -rf $PWD/initramfs/dev/console
+mknod -m 622 $PWD/initramfs/dev/console c 5 1
+rm -rf $PWD/initramfs/dev/tty0
+mknod -m 622 $PWD/initramfs/dev/tty0 c 4 0
+touch $PWD/initramfs/etc/mdev.conf
+cp $PWD/target/bin/busybox $PWD/initramfs/bin/
+cp $PWD/resources/init $PWD/initramfs/
+chmod a+x $PWD/initramfs/init
+cd $PWD/initramfs/bin/
+ln -sf busybox sh
+cd - >/dev/null
+cd $PWD/initramfs
+find ./ | cpio -H newc -o > ../initrd.cpio
+cd - >/dev/null
+gzip -c initrd.cpio > initrd.gz

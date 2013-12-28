@@ -1,17 +1,22 @@
-#!/bin/sh
+#!/bin/busybox sh
+
+/bin/busybox --install -s
+echo "Loading PiNAS..."
 
 [ -d /dev ] || /bin/busybox mkdir -m 0755 /dev
 [ -d /root ] || /bin/busybox mkdir -m 0700 /root
 [ -d /sys ] || /bin/busybox mkdir /sys
 [ -d /proc ] || /bin/busybox mkdir /proc
 [ -d /tmp ] || /bin/busybox mkdir /tmp
-/bin/busybox mkdir -p /var/lock
+[ -d /run ] || /bin/busybox mkdir /run
+
+[ -d /var/lock ] || /bin/busybox mkdir -p /var/lock
 /bin/busybox mount -t sysfs -o nodev,noexec,nosuid sysfs /sys
 /bin/busybox mount -t proc -o nodev,noexec,nosuid proc /proc
 
-/bin/busybox ln -s /proc/self/fd/0 /dev/stdin
-/bin/busybox ln -s /proc/self/fd/1 /dev/stdout
-/bin/busybox ln -s /proc/self/fd/2 /dev/stderr
+/bin/busybox ln -s /proc/self/fd/0 /dev/stdin 2>/dev/null
+/bin/busybox ln -s /proc/self/fd/1 /dev/stdout 2>/dev/null
+/bin/busybox ln -s /proc/self/fd/2 /dev/stderr 2>/dev/null
 
 export PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin
 
@@ -35,36 +40,31 @@ echo "#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 echo "#                                                                            #"
 echo "##############################################################################"
 
-
-echo "Loading PiNAS..."
-
-#Create all the symlinks to /bin/busybox
-busybox --install -s
-
 date
 
 #Create device nodes
-mknod /dev/null c 1 3
-mknod /dev/tty c 5 0
 mdev -s
-
 
 mount -t devtmpfs -o size=$tmpfs_size,mode=0755 udev /dev ||  mount -t tmpfs -o size=$tmpfs_size,mode=0755 udev /dev
 [ -e /dev/console ] || mknod -m 0600 /dev/console c 5 1
 [ -e /dev/null ] || mknod /dev/null c 1 3
+[ -e /dev/tty ] || mknod /dev/tty c 5 0
+[ -e /dev/loop0 ] || mknod /dev/loop0 b 7 0
+[ -e /dev/loop1 ] || mknod /dev/loop1 b 7 1
+
 mkdir /dev/pts
 mount -t devpts -o noexec,nosuid,gid=5,mode=0620 devpts /dev/pts || true
 mount -t tmpfs -o "nosuid,size=20%,mode=0755" tmpfs /run
 mkdir -m 0755 /run/initramfs
-mkdir /media/
-mount /dev/mmcblk0p1 /media
+#mkdir /media/
+mount -o ro /dev/mmcblk0p1 /media
 
 get_opt() {
 	echo "$@" | cut -d "=" -f 2
 }
 
-init="/sbin/init"
-rootmnt="/target
+NEWINI="/sbin/init"
+ROOTMNT="/target"
 
 for i in $(cat /proc/cmdline); do
 	case $i in
@@ -78,12 +78,14 @@ for i in $(cat /proc/cmdline); do
 done
 
 #Here we mount squaskfs root on /target
-mount -o loop -t squashfs /media/rootfs.sqfs "${rootmnt}"
+echo "[I] mounting squashfs..."
+mount -o loop -t squashfs /media/rootfs.sqfs $ROOTMNT
 
-mount -n -o move /sys ${rootmnt}/sys
-mount -n -o move /proc ${rootmnt}/proc
+mount -n -o move /sys $ROOTMNT/sys
+mount -n -o move /proc $ROOTMNT/proc
 
-exec busybox switch_root ${rootmnt} ${init} "$@" <${rootmnt}/dev/console >${rootmnt}/dev/console
-busybox switch_root ${rootmnt} "${init}"
+echo "[I] Switching to root..."
+exec busybox switch_root $ROOTMNT $NEWINIT "$@" <$ROOTMNT/dev/console >$ROOTMNT/dev/console
+busybox switch_root $ROOTMNT $NEWINIT
 
 echo "[E] Error switching to squashfs root"
