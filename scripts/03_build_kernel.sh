@@ -76,8 +76,8 @@ if [ ! -d ../compiled ];then
 fi
 
 echo "[I] Building modules dir..."
-MODULES_TEMP=../compiled/modules
-make ARCH=arm CROSS_COMPILE=${CCPREFIX} INSTALL_MOD_PATH=${MODULES_TEMP} modules_install
+MODULES_TARGET_DIR=../../target/lib/
+make ARCH=arm CROSS_COMPILE=${CCPREFIX} INSTALL_MOD_PATH=${MODULES_TARGET_DIR} modules_install
 
 echo "[I] Copying Kernel image..."
 cp arch/arm/boot/Image ../compiled/kernel.img
