@@ -61,10 +61,6 @@ else
 	cd - >/dev/null
 fi
 
-echo "[I] Deleting precompiled kernel from repo..."
-rm -rf $PWD/raspberrypi/firmware/boot/kernel.img
-rm -rf $PWD/raspberrypi/firmware/boot/kernel_emergency.img
-
 	echo "[I] Erasing disk $SD_DISK..."
 	parted -s $SD_DISK mklabel msdos
 	echo "[I] Making $SD_DISK 1..."
@@ -91,6 +87,9 @@ rm -rf $PWD/raspberrypi/firmware/boot/kernel_emergency.img
 
 	echo "[I] Copying files into SD CARD..."
 	cp -r $PWD/raspberrypi/firmware/boot/* $MOUNTEDSD/
+	echo "[I] Deleting precompiled kernel from repo..."
+	rm -rf $MOUNTEDSD/kernel.img
+	rm -rf $MOUNTEDSD/kernel_emergency.img
 	echo "boot=/dev/mmcblk0p1 disk=/dev/mmcblk0p2" > $MOUNTEDSD/cmdline.txt
 	echo "initramfs initrd.gz" >> $MOUNTEDSD/config.txt
 	cp $PWD/rootfs.sqsh $MOUNTEDSD/
