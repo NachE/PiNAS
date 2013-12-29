@@ -63,7 +63,7 @@ get_opt() {
 	echo "$@" | cut -d "=" -f 2
 }
 
-NEWINI="/sbin/init"
+NEWINIT="/sbin/init"
 ROOTMNT="/target"
 [ -d /target ] || mkdir /target
 
@@ -86,10 +86,15 @@ mount -r -t squashfs -o noatime /dev/loop0 $ROOTMNT
 
 mount -n -o move /sys $ROOTMNT/sys
 mount -n -o move /proc $ROOTMNT/proc
+mount -o bind /dev $ROOTMNT/dev
+mount -n -o move /media $ROOTMNT/media/mmcblk0p1/
+mount -n -o move /run $ROOTMNT/run/
 
 echo "[I] Switching to root..."
-#busybox switch_root $ROOTMNT $NEWINIT "$@" <$ROOTMNT/dev/console >$ROOTMNT/dev/console
-/bin/busybox switch_root $ROOTMNT $NEWINIT
+#exec switch_root $ROOTMNT $NEWINIT "$@" <$ROOTMNT/dev/console >$ROOTMNT/dev/console
+#/bin/busybox switch_root $ROOTMNT $NEWINIT
+exec switch_root -c /dev/console $ROOTMNT $NEWINIT
+#chroot $ROOTMNT $NEWINIT
 
 echo "[E] Error switching to squashfs root. I give you a shell."
 /bin/busybox sh

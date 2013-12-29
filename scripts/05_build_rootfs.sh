@@ -23,4 +23,7 @@ set -e
 
 echo "[I] Building rootfs"
 
+mkdir -p $PWD/target/media/{mmcblk0p1,mmcblk0p2}
+
+rm -rf $PWD/rootfs.sqfs 
 mksquashfs $PWD/target/ $PWD/rootfs.sqfs

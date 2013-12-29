@@ -21,7 +21,87 @@
 
 set -e
 
-echo "[I] creating dir target on $PWD/target"
-mkdir -p target
-echo "[I] Downloading base system into $PWD/target/ dir..."
-multistrap -a armhf -d target -f config/multistrap.conf
+ORIG=$PWD
+
+
+if [ ! -d raspberrypi/ ];then
+	mkdir raspberrypi
+fi
+cd raspberrypi/
+if [ -d $PWD/tools ];then
+	echo "[I] Updating compiler..."
+	cd $PWD/tools
+	git pull
+	cd - >/dev/null
+else
+	echo "[I] Cloning compiler..."
+	git clone https://github.com/raspberrypi/tools.git
+
+fi
+cd $ORIG
+
+cd resources/
+if [ -d $PWD/busybox ];then
+	echo "[I] Updating busybox src..."
+	cd $PWD/busybox
+	git pull
+	cd - >/dev/null
+else
+	echo "[I] Cloning busybox src..."
+	git clone git://busybox.net/busybox.git
+fi
+cd $ORIG
+
+
+echo "[I] Compiling busybox..."
+CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
+echo "[I] CC prefix: $CCPREFIX"
+NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
+echo "[I] CPU Cores: $NUMCORES"
+
+cd $PWD/resources/busybox/
+make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
+cp $ORIG/config/busybox.conf ./.config
+make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX}
+
+cd $ORIG
+
+echo "[I] Erasing target/"
+rm -rf $ORIG/target
+echo "[I] Making initial directories on target/"
+#####
+#Extracted from LFS doc
+mkdir -pv $PWD/target/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}
+mkdir -pv $PWD/target/{media/{floppy,cdrom},sbin,srv,var}
+install -dv -m 0750 $PWD/target/root
+install -dv -m 1777 $PWD/target/tmp $PWD/target/var/tmp
+mkdir -pv $PWD/target/usr/{,local/}{bin,include,lib,sbin,src}
+mkdir -pv $PWD/target/usr/{,local/}share/{doc,info,locale,man}
+mkdir -v  $PWD/target/usr/{,local/}share/{misc,terminfo,zoneinfo}
+mkdir -pv $PWD/target/usr/{,local/}share/man/man{1..8}
+for dir in $PWD/target/usr $PWD/target/usr/local; do
+  ln -sv share/{man,doc,info} $dir
+done
+mkdir -v $PWD/target/var/{log,mail,spool}
+ln -sv $PWD/target/run $PWD/target/var/run
+ln -sv $PWD/target/run/lock $PWD/target/var/lock
+mkdir -pv $PWD/target/var/{opt,cache,lib/{misc,locate},local}
+
+mkdir -pv $PWD/target/{sys,dev,proc}
+
+echo "[I] Installing busybox on target/"
+cd $PWD/resources/busybox/
+make ARCH=arm CROSS_COMPILE=${CCPREFIX} CONFIG_PREFIX=$ORIG/target/ install
+chown root.root $ORIG/target/bin/busybox
+chmod u+s $ORIG/target/bin/busybox
+
+#cp $PWD/resources/busybox/busybox $PWD/target/bin
+
+
+
+
+
+
+
+
+
