@@ -49,12 +49,16 @@ else
 	git clone https://github.com/raspberrypi/linux.git
 fi
 
-CCPREFIX=$PWD/tools/arm-bcm2708/arm-bcm2708-linux-gnueabi/bin/arm-bcm2708-linux-gnueabi-
+
+CCPREFIX=$PWD/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
 cd linux/
 echo "[I] Cleaning..."
 make mrproper
 echo "[I] Using config arch/arm/configs/bcmrpi_defconfig"
 cp arch/arm/configs/bcmrpi_defconfig ./.config
+echo "[I] Setting squashfs compiled into kernel..."
+sed -i -e "s/^CONFIG_SQUASHFS=.*/CONFIG_SQUASHFS=y/" .config
+
 
 EXTVER=-PiNAS-`date +%Y%m%d%H%M`
 echo "[I] Seting extraversion $EXTVER"
@@ -76,10 +80,10 @@ if [ ! -d ../compiled ];then
 fi
 
 echo "[I] Building modules dir..."
-MODULES_TARGET_DIR=../../target/lib/
+MODULES_TARGET_DIR=../../target/
 make ARCH=arm CROSS_COMPILE=${CCPREFIX} INSTALL_MOD_PATH=${MODULES_TARGET_DIR} modules_install
 
 echo "[I] Copying Kernel image..."
-cp arch/arm/boot/Image ../compiled/kernel.img
+cp arch/arm/boot/zImage ../compiled/kernel.img
 
 cd $ORIG

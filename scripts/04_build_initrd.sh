@@ -33,12 +33,16 @@ mknod -m 622 $PWD/initramfs/dev/console c 5 1
 rm -rf $PWD/initramfs/dev/tty0
 mknod -m 622 $PWD/initramfs/dev/tty0 c 4 0
 touch $PWD/initramfs/etc/mdev.conf
+
 cp $PWD/target/bin/busybox $PWD/initramfs/bin/
+
 cp $PWD/resources/init $PWD/initramfs/
 chmod a+x $PWD/initramfs/init
+
 cd $PWD/initramfs/bin/
 ln -sf busybox sh
 cd - >/dev/null
+
 cd $PWD/initramfs
 find ./ | cpio -H newc -o > ../initrd.cpio
 cd - >/dev/null

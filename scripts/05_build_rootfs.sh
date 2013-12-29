@@ -23,4 +23,4 @@ set -e
 
 echo "[I] Building rootfs"
 
-mksquashfs $PWD/target/ $PWD/rootfs.sqsh
+mksquashfs $PWD/target/ $PWD/rootfs.sqfs

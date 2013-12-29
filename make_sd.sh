@@ -90,7 +90,10 @@ fi
 	echo "[I] Deleting precompiled kernel from repo..."
 	rm -rf $MOUNTEDSD/kernel.img
 	rm -rf $MOUNTEDSD/kernel_emergency.img
-	echo "boot=/dev/mmcblk0p1 disk=/dev/mmcblk0p2" > $MOUNTEDSD/cmdline.txt
+	echo "root=/dev/mmcblk0p1 initrd=/initrd smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 rootwait" > $MOUNTEDSD/cmdline.txt
+	echo "gpu_mem=128" >> $MOUNTEDSD/config.txt
+	echo "kernel=kernel.img" >> $MOUNTEDSD/config.txt
+	echo "cmdline=cmdline.txt" >> $MOUNTEDSD/config.txt
 	echo "initramfs initrd.gz" >> $MOUNTEDSD/config.txt
 	cp $PWD/rootfs.sqsh $MOUNTEDSD/
 	cp $PWD/raspberrypi/compiled/kernel.img $MOUNTEDSD/
