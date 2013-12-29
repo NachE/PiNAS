@@ -91,7 +91,7 @@ fi
 	rm -rf $MOUNTEDSD/kernel.img
 	rm -rf $MOUNTEDSD/kernel_emergency.img
 	echo "root=/dev/mmcblk0p1 initrd=/initrd smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 rootwait" > $MOUNTEDSD/cmdline.txt
-	echo "gpu_mem=128" >> $MOUNTEDSD/config.txt
+	echo "gpu_mem=64" >> $MOUNTEDSD/config.txt
 	echo "kernel=kernel.img" >> $MOUNTEDSD/config.txt
 	echo "cmdline=cmdline.txt" >> $MOUNTEDSD/config.txt
 	echo "initramfs initrd.gz" >> $MOUNTEDSD/config.txt

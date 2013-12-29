@@ -66,28 +66,28 @@ make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX}
 
 cd $ORIG
 
-echo "[I] Erasing target/"
-rm -rf $ORIG/target
+#echo "[I] Erasing target/"
+#rm -rf $ORIG/target
 echo "[I] Making initial directories on target/"
 #####
 #Extracted from LFS doc
-mkdir -pv $PWD/target/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}
-mkdir -pv $PWD/target/{media/{floppy,cdrom},sbin,srv,var}
+mkdir -p $PWD/target/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}
+mkdir -p $PWD/target/{media/{floppy,cdrom},sbin,srv,var}
 install -dv -m 0750 $PWD/target/root
 install -dv -m 1777 $PWD/target/tmp $PWD/target/var/tmp
-mkdir -pv $PWD/target/usr/{,local/}{bin,include,lib,sbin,src}
-mkdir -pv $PWD/target/usr/{,local/}share/{doc,info,locale,man}
-mkdir -v  $PWD/target/usr/{,local/}share/{misc,terminfo,zoneinfo}
-mkdir -pv $PWD/target/usr/{,local/}share/man/man{1..8}
+mkdir -p $PWD/target/usr/{,local/}{bin,include,lib,sbin,src}
+mkdir -p $PWD/target/usr/{,local/}share/{doc,info,locale,man}
+mkdir -p  $PWD/target/usr/{,local/}share/{misc,terminfo,zoneinfo}
+mkdir -p $PWD/target/usr/{,local/}share/man/man{1..8}
 for dir in $PWD/target/usr $PWD/target/usr/local; do
-  ln -sv share/{man,doc,info} $dir
+  ln -sf share/{man,doc,info} $dir
 done
-mkdir -v $PWD/target/var/{log,mail,spool}
-ln -sv $PWD/target/run $PWD/target/var/run
-ln -sv $PWD/target/run/lock $PWD/target/var/lock
-mkdir -pv $PWD/target/var/{opt,cache,lib/{misc,locate},local}
+mkdir -p $PWD/target/var/{log,mail,spool}
+ln -sf $PWD/target/run $PWD/target/var/run
+ln -sf $PWD/target/run/lock $PWD/target/var/lock
+mkdir -p $PWD/target/var/{opt,cache,lib/{misc,locate},local}
 
-mkdir -pv $PWD/target/{sys,dev,proc}
+mkdir -p $PWD/target/{sys,dev,proc}
 
 echo "[I] Installing busybox on target/"
 cd $PWD/resources/busybox/
