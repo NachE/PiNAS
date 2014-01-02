@@ -66,8 +66,6 @@ make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX}
 
 cd $ORIG
 
-#echo "[I] Erasing target/"
-#rm -rf $ORIG/target
 echo "[I] Making initial directories on target/"
 #####
 #Extracted from LFS doc
