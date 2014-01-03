@@ -38,16 +38,19 @@ cd $ORIG
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
 LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/
-#CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}/lib/ LDFLAGS="-L${LIBPATH}/lib/"
+
+#CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}/usr/lib/ LDFLAGS="-L${LIBPATH}/usr/lib/"
 
 echo "[I] Compiling samba..."
 cd resources/samba
 
-make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}/lib/ LDFLAGS="-L${LIBPATH}/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
+make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
 
-ARCH=arm CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}lib/ LDFLAGS="-L${LIBPATH}lib/" CROSS_COMPILE=${CCPREFIX} ./configure --without-gettext --without-winbind --without-ads --without-ldap --disable-cups --disable-iprint --without-pam --without-pam_smbpass --without-quotas --without-sendfile-support --without-utmp --disable-avahi --with-iconv --without-acl-support --without-dnsupdate --without-automount --with-aio-support --without-dmapi --without-fam --without-profiling-data --without-cluster-support --without-regedit --disable-glusterfs --without-ad-dc  --without-pie --nopyc --nopyo --fatal-errors --cross-compile --cross-execute='qemu-arm-static -L ${LIBPATH}' --destdir=$ORIG/target/
+echo "[I] Configuring src before build..."
+echo "[I] Using ${LIBPATH} as elf interpreter prefix..." 
+ARCH=arm CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" CROSS_COMPILE=${CCPREFIX} buildtools/bin/waf configure --without-gettext --without-winbind --without-ads --without-ldap --disable-cups --disable-iprint --without-pam --without-pam_smbpass --without-quotas --without-sendfile-support --without-utmp --disable-avahi --with-iconv --without-acl-support --without-dnsupdate --without-automount --with-aio-support --without-dmapi --without-fam --without-profiling-data --without-cluster-support --without-regedit --disable-glusterfs --without-ad-dc  --without-pie --nopyc --nopyo --fatal-errors --cross-compile --cross-execute="qemu-arm-static -L ${LIBPATH}" --destdir=$ORIG/target/
 
-make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH} LDFLAGS="-L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX}
+make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX}
 
 #CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
 #echo "[I] CC prefix: $CCPREFIX"
