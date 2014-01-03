@@ -24,15 +24,20 @@ set -e
 ORIG=$PWD
 
 cd resources/
-if [ -d $PWD/samba ];then
-	echo "[I] Updating samba src..."
-	cd $PWD/samba
-	git pull
+if [ -d $PWD/cpython ];then
+	echo "[I] Updating python src..."
+	cd $PWD/cpython
+	hg pull
 	cd - >/dev/null
 else
-	echo "[I] Cloning samba src..."
-	git clone git://git.samba.org/samba.git
+	echo "[I] Cloning python src..."
+	hg clone http://hg.python.org/cpython
+	echo "[I] Switching to 2.7 branch..."
+	hg update -C 2.7
 fi
+
+echo "[I] Making CONFIG_SITE file..."
+echo -e "ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n" > $ORIG/resources/cpython/configsite.pinas
 cd $ORIG
 
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
@@ -41,16 +46,19 @@ LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspb
 
 #CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}/usr/lib/ LDFLAGS="-L${LIBPATH}/usr/lib/"
 
-echo "[I] Compiling samba..."
-cd resources/samba
+echo "[I] Compiling python..."
+cd resources/cpython
 
-make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
+make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} clean || echo "Nothing to clean"
 
 echo "[I] Configuring src before build..."
-echo "[I] Using ${LIBPATH} as elf interpreter prefix..." 
-ARCH=arm CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" CROSS_COMPILE=${CCPREFIX} buildtools/bin/waf configure --without-gettext --without-winbind --without-ads --without-ldap --disable-cups --disable-iprint --without-pam --without-pam_smbpass --without-quotas --without-sendfile-support --without-utmp --disable-avahi --with-iconv --without-acl-support --without-dnsupdate --without-automount --with-aio-support --without-dmapi --without-fam --without-profiling-data --without-cluster-support --without-regedit --disable-glusterfs --without-ad-dc  --without-pie --nopyc --nopyo --fatal-errors --cross-compile --cross-execute="qemu-arm-static -L ${LIBPATH}" --destdir=$ORIG/target/
+ARCH=arm CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" CROSS_COMPILE=${CCPREFIX} CONFIG_SITE=configsite.pinas QEMU_LD_PREFIX=${LIBPATH} ./configure --prefix=$ORIG/target_python  --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --disable-ipv6 --without-pydebug 
 
-make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX}
+make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH}
+
+[ -d $ORIG/target_python ] || mkdir $ORIG/target_python
+
+make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} install
 
 #CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
 #echo "[I] CC prefix: $CCPREFIX"
