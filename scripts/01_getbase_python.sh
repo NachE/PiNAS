@@ -33,6 +33,7 @@ else
 	echo "[I] Cloning python src..."
 	hg clone http://hg.python.org/cpython
 	echo "[I] Switching to 2.7 branch..."
+	cd $PWD/cpython
 	hg update -C 2.7
 fi
 
