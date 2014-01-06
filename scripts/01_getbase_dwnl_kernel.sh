@@ -32,3 +32,10 @@ else
 	echo "[I] Cloning linux kernel source..."
 	git clone https://github.com/raspberrypi/linux.git
 fi
+
+echo "[I] Making headers..."
+[ -d $ORIG/target_linux_headers ] || mkdir $ORIG/target_linux_headers
+cd $ORIG/raspberrypi/linux/
+CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} make headers_install INSTALL_HDR_PATH=$ORIG/target_linux_headers
+
+
