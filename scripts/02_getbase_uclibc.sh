@@ -31,7 +31,7 @@ if [ -d $PWD/uclibc ];then
 	git pull
 	cd - >/dev/null
 else
-	echo "[I] Cloning glibc src..."
+	echo "[I] Cloning uclibc src..."
 	git clone git://uclibc.org/uClibc.git uclibc
 fi
 cd uclibc

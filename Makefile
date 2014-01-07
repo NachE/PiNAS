@@ -3,7 +3,22 @@ all:
 	build_pinas.sh	
 
 base:
-	scripts/00_getbase.sh
+	scripts/00_getbase_busybox.sh
+	scripts/01_getbase_dwnl_kernel.sh
+	scripts/02_getbase_uclibc.sh
+	scripts/03_getbase_python.sh
+	scripts/04_getbase_samba.sh
+
+busybox:
+	scripts/00_getbase_busybox.sh
+kernel_headers:
+	scripts/01_getbase_dwnl_kernel.sh
+uclibc:
+	scripts/02_getbase_uclibc.sh
+python:
+	scripts/03_getbase_python.sh
+samba:
+	scripts/04_getbase_samba.sh
 
 upchroot:
 	scripts/10_preparechroot.sh
@@ -30,8 +45,8 @@ boot:
 
 help:
 	@echo  '  all             - Exec build_pinas.sh'
-	@echo  '  base            - (00) Download base debian system'
-	@echo  '  upchroot        - (10,20) Mount proc, sys, etc and leave target to be used'
+	@echo  '  base            - (00) Build base (busybox, uclibc, *python, samba)'
+	@echo  '  upchroot        - (10,20) Mount proc, sys, etc and leave target to be chrooted'
 	@echo  '  downchroot      - (90) Umount proc, sys, etc from target'
 	@echo  '  kernel          - (30) Download linux src, compiler an build kernel/modules'
 	@echo  '  initrd          - (40) Create an initrd.gz (inside chrooted target)'
@@ -39,4 +54,6 @@ help:
 	@echo  '  boot            - (60) Download boot files and configure parameters'
 	@echo  '  joinchroot      - Join into chroot env'
 	@echo  '  help            - This'
+	@echo ' '
+	@echo '*Python is builded because samba requered it. No python binary is added to target'
 

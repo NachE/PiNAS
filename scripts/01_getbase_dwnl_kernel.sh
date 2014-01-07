@@ -22,7 +22,7 @@
 set -e
 
 ORIG=$PWD
-
+cd raspberrypi
 if [ -d $PWD/linux ];then
 	echo "[I] Updating linux kernel source ..."
 	cd $PWD/linux
