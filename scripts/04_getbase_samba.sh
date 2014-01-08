@@ -38,8 +38,13 @@ fi
 cd $ORIG
 
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
-CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
-LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/
+
+CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
+#CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
+
+LIBPATH=$ORIG/resources/buildroot/output/staging/
+#LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/
+
 LIBPATH_PYTHON=$ORIG/target_python/lib/
 #C_INCLUDE_PATH=$ORIG/target_python/include/python2.7/
 #C_INCLUDE_PATH=${PYTHONINCLUDE}

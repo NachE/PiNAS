@@ -56,7 +56,7 @@ cp $ORIG/config/buildroot.conf ./.config
 make -j $NUMCORES oldconfig
 
 echo "[I] Building..."
-make -j $NUMCORES 
+make -j $NUMCORES toolchain
 
 
 
