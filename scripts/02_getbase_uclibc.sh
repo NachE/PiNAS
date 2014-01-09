@@ -33,6 +33,7 @@ if [ -d $PWD/uclibc ];then
 else
 	echo "[I] Cloning uclibc src..."
 	git clone git://uclibc.org/uClibc.git uclibc
+	cd $PWD/uclibc/
 	git checkout 0.9.33
 fi
 cd uclibc

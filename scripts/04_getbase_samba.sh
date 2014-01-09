@@ -33,6 +33,7 @@ else
 	echo "[I] Cloning samba src..."
 	git clone git://git.samba.org/samba.git
 	echo "[I] Switching to v4-0-stable..."
+	cd $PWD/samba
 	git checkout v4-0-stable
 fi
 cd $ORIG
