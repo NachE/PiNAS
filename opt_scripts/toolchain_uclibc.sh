@@ -32,6 +32,8 @@ if [ -d $PWD/buildroot ];then
 else
 	echo "[I] Cloning uclibc buildroot src..."
 	git clone git://git.buildroot.net/buildroot
+	cd buildroot
+	git checkout 2013.08.x
 fi
 cd buildroot
 
