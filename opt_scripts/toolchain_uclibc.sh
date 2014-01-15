@@ -51,6 +51,7 @@ echo "[I] Cleaning buildroot..."
 make -j $NUMCORES clean || echo "Nothing to clean"
 
 echo "[I] Configuring..."
+cp $ORIG/config/uclibc.conf $ORIG/resources/buildroot/package/uclibc/uClibc-snapshot.config.pinas
 cp $ORIG/config/buildroot.conf ./.config
 
 make -j $NUMCORES oldconfig
