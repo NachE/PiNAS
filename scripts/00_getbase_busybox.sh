@@ -24,21 +24,24 @@ set -e
 ORIG=$PWD
 
 
-if [ ! -d raspberrypi/ ];then
-	mkdir raspberrypi
-fi
-cd raspberrypi/
-if [ -d $PWD/tools ];then
-	echo "[I] Updating compiler..."
-	cd $PWD/tools
-	git pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning compiler..."
-	git clone https://github.com/raspberrypi/tools.git
 
-fi
-cd $ORIG
+
+#if [ ! -d raspberrypi/ ];then
+#	mkdir raspberrypi
+#fi
+#cd raspberrypi/
+#if [ -d $PWD/tools ];then
+#	echo "[I] Updating compiler..."
+#	cd $PWD/tools
+#	git pull
+#	cd - >/dev/null
+#else
+#	echo "[I] Cloning compiler..."
+#	git clone https://github.com/raspberrypi/tools.git
+#
+#fi
+#cd $ORIG
+
 
 cd resources/
 if [ -d $PWD/busybox ];then
@@ -51,6 +54,7 @@ else
 	git clone git://busybox.net/busybox.git
 fi
 cd $ORIG
+
 
 
 echo "[I] Compiling busybox..."
