@@ -54,16 +54,18 @@ unset LD_LIBRARY_PATH
 unset LDFLAGS
 
 echo "[I] Cleaning buildroot..."
-make -j $NUMCORES clean || echo "Nothing to clean"
+make clean || echo "Nothing to clean"
+make distclean || echo "Nothing to clean"
+
 
 echo "[I] Configuring..."
 cp $ORIG/config/uclibc.conf $ORIG/resources/buildroot/package/uclibc/uClibc-snapshot.config.pinas
 cp $ORIG/config/buildroot.conf ./.config
 
-make -j $NUMCORES oldconfig
+make olddefconfig
 
 echo "[I] Building..."
-make -j $NUMCORES toolchain
+make toolchain
 
 
 
