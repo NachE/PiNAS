@@ -26,18 +26,22 @@ ORIG=$PWD
 cd resources/
 if [ -d $PWD/buildroot ];then
 	echo "[I] Updating uclibc buildroot src..."
-	cd $PWD/buildroot
+	cd $ORIG/resources/buildroot
+	git checkout 2013.08.x
 	git pull
 	cd - >/dev/null
 else
 	echo "[I] Cloning uclibc buildroot src..."
 	git clone git://git.buildroot.net/buildroot
+	cd $ORIG/resources/buildroot
+	git checkout 2013.08.x
 fi
-cd buildroot
+cd $ORIG/resources/buildroot
 
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 
 unset CC
+unset CPP
 unset CXX
 unset LD
 unset NM
@@ -46,6 +50,8 @@ unset RANLIB
 unset ARCH
 unset CROSS_COMPILE
 unset QEMU_LD_PREFIX
+unset LD_LIBRARY_PATH
+unset LDFLAGS
 
 echo "[I] Cleaning buildroot..."
 make -j $NUMCORES clean || echo "Nothing to clean"
