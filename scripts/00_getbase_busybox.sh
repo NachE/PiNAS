@@ -23,9 +23,6 @@ set -e
 
 ORIG=$PWD
 
-
-
-
 #if [ ! -d raspberrypi/ ];then
 #	mkdir raspberrypi
 #fi
@@ -64,14 +61,12 @@ NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 echo "[I] CPU Cores: $NUMCORES"
 
 
-
 LIBPATH=$ORIG/resources/buildroot/output/staging/
 #LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/
 
 
-
 cd $PWD/resources/busybox/
-make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
+sudo make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
 cp $ORIG/config/busybox.conf ./.config
 #make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX}
 
@@ -84,29 +79,30 @@ cd $ORIG
 echo "[I] Making initial directories on target/"
 #####
 #Extracted from LFS doc
-mkdir -p $PWD/target/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}
-mkdir -p $PWD/target/{media/{floppy,cdrom},sbin,srv,var}
-install -dv -m 0750 $PWD/target/root
-install -dv -m 1777 $PWD/target/tmp $PWD/target/var/tmp
-mkdir -p $PWD/target/usr/{,local/}{bin,include,lib,sbin,src}
-mkdir -p $PWD/target/usr/{,local/}share/{doc,info,locale,man}
-mkdir -p  $PWD/target/usr/{,local/}share/{misc,terminfo,zoneinfo}
-mkdir -p $PWD/target/usr/{,local/}share/man/man{1..8}
+sudo mkdir -p $PWD/target/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}
+sudo mkdir -p $PWD/target/{media/{floppy,cdrom},sbin,srv,var}
+sudo install -dv -m 0750 $PWD/target/root
+sudo install -dv -m 1777 $PWD/target/tmp $PWD/target/var/tmp
+sudo mkdir -p $PWD/target/usr/{,local/}{bin,include,lib,sbin,src}
+sudo mkdir -p $PWD/target/usr/{,local/}share/{doc,info,locale,man}
+sudo mkdir -p  $PWD/target/usr/{,local/}share/{misc,terminfo,zoneinfo}
+sudo mkdir -p $PWD/target/usr/{,local/}share/man/man{1..8}
 for dir in $PWD/target/usr $PWD/target/usr/local; do
-  ln -sf share/{man,doc,info} $dir
+  sudo ln -sf share/{man,doc,info} $dir
 done
-mkdir -p $PWD/target/var/{log,mail,spool}
-ln -sf $PWD/target/run $PWD/target/var/run
-ln -sf $PWD/target/run/lock $PWD/target/var/lock
-mkdir -p $PWD/target/var/{opt,cache,lib/{misc,locate},local}
+sudo mkdir -p $PWD/target/var/{log,mail,spool}
+sudo ln -sf $PWD/target/run $PWD/target/var/run
+sudo ln -sf $PWD/target/run/lock $PWD/target/var/lock
+sudo mkdir -p $PWD/target/var/{opt,cache,lib/{misc,locate},local}
 
-mkdir -p $PWD/target/{sys,dev,proc}
+sudo mkdir -p $PWD/target/{sys,dev,proc}
 
 echo "[I] Installing busybox on target/"
 cd $PWD/resources/busybox/
-make ARCH=arm CROSS_COMPILE=${CCPREFIX} CONFIG_PREFIX=$ORIG/target/ install
-chown root.root $ORIG/target/bin/busybox
-chmod u+s $ORIG/target/bin/busybox
+sudo make ARCH=arm CROSS_COMPILE=${CCPREFIX} CONFIG_PREFIX=$ORIG/target/ install
+echo "[I] setting busybox setuid..."
+sudo chown root.root $ORIG/target/bin/busybox
+sudo chmod u+s $ORIG/target/bin/busybox
 
 #cp $PWD/resources/busybox/busybox $PWD/target/bin
 
