@@ -50,3 +50,15 @@ function git_down_upd {
 	fi
 }
 
+
+function get_qemu_arm_path {
+	if [ -f $ORIG/host/bin/qemu-arm ]; then
+		echo "$ORIG/host/bin/qemu-arm"
+	elif [ -f /usr/bin/qemu-arm-static ]; then
+		echo "/usr/bin/qemu-arm-static"
+	elif [ -f /usr/bin/qemu-arm ]; then
+		echo "/usr/bin/qemu-arm"
+	else
+		echo ""
+	fi
+}

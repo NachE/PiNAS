@@ -21,7 +21,9 @@
 
 set -e
 
-ORIG=$PWD
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_functions/general.sh
+PNAME="samba"
 
 cd resources/
 if [ -d $PWD/samba ];then
@@ -38,7 +40,7 @@ else
 fi
 cd $ORIG
 
-NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
+QEMUARMBIN=$(get_qemu_arm_path)
 
 CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
 #CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
@@ -46,43 +48,52 @@ CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclib
 LIBPATH=$ORIG/resources/buildroot/output/staging/
 #LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/
 
-LIBPATH_PYTHON=$ORIG/target_python/lib/
+LIBPATH_PYTHON=$LIBPATH/lib/
 #C_INCLUDE_PATH=$ORIG/target_python/include/python2.7/
 #C_INCLUDE_PATH=${PYTHONINCLUDE}
-PYTHONINCLUDE=$ORIG/target_python/include/python2.7/
+PYTHONINCLUDE=$LIBPATH/include/python2.7/
 PYTHON_CFG_BINARY=$ORIG/resources/buildroot/output/staging/bin/python-config
 
 #CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}/usr/lib/ LDFLAGS="-L${LIBPATH}/usr/lib/"
 
-echo "[I] Compiling samba..."
 cd resources/samba
 
 #####################
 #make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH_PYTHON}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} C_INCLUDE_PATH=${PYTHONINCLUDE} clean || echo "Nothing to clean"
 #
-PYTHON_CONFIG=${PYTHON_CFG_BINARY} CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH_PYTHON}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} C_INCLUDE_PATH=${PYTHONINCLUDE} buildtools/bin/waf clean || echo "Nothing to clean"
+
+echo_info "$PNAME Cleaning..."
+#PYTHON_CONFIG="${PYTHON_CFG_BINARY}" CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/" LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH_PYTHON}" ARCH=arm CROSS_COMPILE="${CCPREFIX}" QEMU_LD_PREFIX="${LIBPATH}" C_INCLUDE_PATH="${PYTHONINCLUDE}" python buildtools/bin/waf clean || echo "Nothing to clean"
+
+PYTHON_CONFIG="${PYTHON_CFG_BINARY}" CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LDFLAGS="-L${LIBPATH}lib/ -L${LIBPATH_PYTHON}" ARCH=arm CROSS_COMPILE="${CCPREFIX}" QEMU_LD_PREFIX="${LIBPATH}" C_INCLUDE_PATH="${PYTHONINCLUDE}" python buildtools/bin/waf clean || echo "Nothing to clean"
+
 #####################
 
+echo_info "$PNAME Setting up arm binfmt..."
+sudo $ORIG/scripts_utils/enable_arm_binfmt.sh
 
-echo "[I] Configuring src before build..."
-echo "[I] Using ${LIBPATH} as elf interpreter prefix..." 
+echo_info "$PNAME Configuring src before build..."
+echo_info "$PNAME Using ${LIBPATH} as elf interpreter prefix..." 
 
 #####################
-PYTHON_CONFIG=${PYTHON_CFG_BINARY} ARCH=arm CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH_PYTHON}" CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} C_INCLUDE_PATH=${PYTHONINCLUDE} buildtools/bin/waf configure --without-gettext --without-winbind --without-ads --without-ldap --disable-cups --disable-iprint --without-pam --without-pam_smbpass --without-quotas --without-sendfile-support --without-utmp --disable-avahi --with-iconv --without-acl-support --without-dnsupdate --without-automount --without-aio-support --without-dmapi --without-fam --without-profiling-data --without-cluster-support --without-ad-dc --disable-gnutls --without-pie --nopyc --nopyo --fatal-errors --prefix=$ORIG/target/ --cross-compile --cross-execute="qemu-arm-static -L ${LIBPATH}" --destdir=$ORIG/target/ --disable-ntdb --disable-pthreadpool --disable-rpath --disable-rpath-install --disable-rpath-private-install
+PYTHON_CONFIG="${PYTHON_CFG_BINARY}" ARCH="arm" CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LDFLAGS="-L${LIBPATH}lib/ -L${LIBPATH_PYTHON}" CROSS_COMPILE="${CCPREFIX}" QEMU_LD_PREFIX="${LIBPATH}" C_INCLUDE_PATH="${PYTHONINCLUDE}" buildtools/bin/waf configure --without-gettext --without-winbind --without-ads --without-ldap --disable-cups --disable-iprint --without-pam --without-pam_smbpass --without-quotas --without-sendfile-support --without-utmp --disable-avahi --with-iconv --without-acl-support --without-dnsupdate --without-automount --without-aio-support --without-dmapi --without-fam --without-profiling-data --without-cluster-support --without-ad-dc --disable-gnutls --without-pie --nopyc --nopyo --fatal-errors --prefix=$ORIG/target/ --cross-compile --cross-execute="$QEMUARMBIN -L ${LIBPATH}" --destdir=$ORIG/target/ --disable-ntdb --disable-pthreadpool --disable-rpath --disable-rpath-install --disable-rpath-private-install
 # Future options: --without-regedit --disable-glusterfs
 #####################
-
 
 #####################
 #make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH_PYTHON}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} C_INCLUDE_PATH=${PYTHONINCLUDE}
 #
-PYTHON_CONFIG=${PYTHON_CFG_BINARY} CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH_PYTHON}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} C_INCLUDE_PATH=${PYTHONINCLUDE} buildtools/bin/waf -vvv build -j $NUMCORES
+
+echo_info "$PNAME Building..."
+PYTHON_CONFIG="${PYTHON_CFG_BINARY}" CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib"  LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}lib/ -L${LIBPATH_PYTHON}" ARCH="arm" CROSS_COMPILE="${CCPREFIX}" QEMU_LD_PREFIX="${LIBPATH}" C_INCLUDE_PATH="${PYTHONINCLUDE}" buildtools/bin/waf -vvv build -j $NUMCORES
 #####################
 
 
 #####################
 #make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH_PYTHON}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} C_INCLUDE_PATH=${PYTHONINCLUDE} install
 #
+
+echo_info "$PNAME Installing..."
 PYTHON_CONFIG=${PYTHON_CFG_BINARY} CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH_PYTHON}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} C_INCLUDE_PATH=${PYTHONINCLUDE} buildtools/bin/waf install -j $NUMCORES
 #####################
 
