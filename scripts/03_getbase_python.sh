@@ -21,7 +21,9 @@
 
 set -e
 
-ORIG=$PWD
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_functions/general.sh
+PNAME="python"
 
 cd resources/
 if [ -d $PWD/cpython ];then
@@ -37,33 +39,39 @@ else
 	hg update -C 2.7
 fi
 
-echo "[I] Making CONFIG_SITE file..."
+echo_info "Making CONFIG_SITE file..."
 echo -e "ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n" > $ORIG/resources/cpython/configsite.pinas
 cd $ORIG
 
-NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
-
+echo_info "Setting env vars"
 CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
 #CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
-
 LIBPATH=$ORIG/resources/buildroot/output/staging/
+#On CentOS you can use "scl enable python27 bash" after install python27 with scl
+PYTHONLIBPATH1=$(python-config --prefix)/lib/
+PYTHONLIBPATH2=$(python-config --prefix)/lib64/
 #LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/
-
 #CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}/usr/lib/ LDFLAGS="-L${LIBPATH}/usr/lib/"
-
 TOOLCHAINPATH=$ORIG/resources/buildroot/output/staging/
 
-echo "[I] Compiling python..."
+echo_info "$PNAME Setting up arm binfmt..."
+sudo $ORIG/scripts_utils/enable_arm_binfmt.sh
+
+echo_info "$PNAME Compiling python..."
 cd resources/cpython
 
-make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} clean || echo "Nothing to clean"
+make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/;$PYTHONLIBPATH1;$PYTHONLIBPATH2" LDFLAGS="-L${LIBPATH}usr/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} clean || echo "Nothing to clean"
 
-echo "[I] Configuring src before build..."
-ARCH=arm CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/" CROSS_COMPILE=${CCPREFIX} CONFIG_SITE=configsite.pinas QEMU_LD_PREFIX=${LIBPATH} ./configure --prefix=${TOOLCHAINPATH}  --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --disable-ipv6 --without-pydebug 
+echo_info "$PNAME Configuring src before build..."
+ARCH=arm CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/;$PYTHONLIBPATH1;$PYTHONLIBPATH2" LDFLAGS="-L${LIBPATH}usr/lib/" CROSS_COMPILE=${CCPREFIX} CONFIG_SITE=configsite.pinas QEMU_LD_PREFIX=${LIBPATH} ./configure --prefix=${TOOLCHAINPATH}  --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --disable-ipv6 --without-pydebug --disable-nis 
 
-make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH}
+echo_info "$PNAME Building..."
+make -j 1 CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/;$PYTHONLIBPATH1;$PYTHONLIBPATH2" LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH}
 
 #[ -d $ORIG/target_python ] || mkdir $ORIG/target_python
 
-make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} install
+echo_info "$PNAME Installing..."
+make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/;$PYTHONLIBPATH1;$PYTHONLIBPATH2" LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} install
+
+
 

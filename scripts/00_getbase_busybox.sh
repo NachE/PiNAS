@@ -21,8 +21,9 @@
 
 set -e
 
-ORIG=$PWD
-
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_functions/general.sh
+PNAME="busybox"
 #if [ ! -d raspberrypi/ ];then
 #	mkdir raspberrypi
 #fi
@@ -54,11 +55,11 @@ cd $ORIG
 
 
 
-echo "[I] Compiling busybox..."
+echo_info "$PNAME Compiling..."
 CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
-echo "[I] CC prefix: $CCPREFIX"
+echo_info "CC prefix: $CCPREFIX"
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
-echo "[I] CPU Cores: $NUMCORES"
+echo_info "CPU Cores: $NUMCORES"
 
 
 LIBPATH=$ORIG/resources/buildroot/output/staging/
@@ -72,11 +73,9 @@ cp $ORIG/config/busybox.conf ./.config
 
 make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH}
 
-
-
 cd $ORIG
 
-echo "[I] Making initial directories on target/"
+echo_info "$PNAME Making initial directories on target/"
 #####
 #Extracted from LFS doc
 sudo mkdir -p $PWD/target/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}
@@ -97,10 +96,10 @@ sudo mkdir -p $PWD/target/var/{opt,cache,lib/{misc,locate},local}
 
 sudo mkdir -p $PWD/target/{sys,dev,proc}
 
-echo "[I] Installing busybox on target/"
+echo_info "$PNAME Installing busybox on target/"
 cd $PWD/resources/busybox/
 sudo make ARCH=arm CROSS_COMPILE=${CCPREFIX} CONFIG_PREFIX=$ORIG/target/ install
-echo "[I] setting busybox setuid..."
+echo_info "$PNAME setting busybox setuid..."
 sudo chown root.root $ORIG/target/bin/busybox
 sudo chmod u+s $ORIG/target/bin/busybox
 

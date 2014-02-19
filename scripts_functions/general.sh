@@ -21,22 +21,32 @@
 
 set -e
 
-ORIG=$PWD
-mkdir -p raspberrypi
-cd raspberrypi
-if [ -d $PWD/linux ];then
-	echo "[I] Updating linux kernel source ..."
-	cd $PWD/linux
-	git pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning linux kernel source..."
-	git clone https://github.com/raspberrypi/linux.git
-fi
+NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 
-echo "[I] Making headers..."
-[ -d $ORIG/target_linux_headers ] || mkdir $ORIG/target_linux_headers
-cd $ORIG/raspberrypi/linux/
-CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} make headers_install INSTALL_HDR_PATH=$ORIG/target_linux_headers
+function echo_info {
+	echo -e '\E[37;32m'"\033[1m[I] ===> $1\033[0m"
+}
 
+function exit_msg {
+	echo -e '\E[37;31m'"\033[1m[E] !!!> $1\033[0m"
+}
+
+# $1 repository, $2 branch, $3 directory
+function git_down_upd {
+	if [ -d $3 ];then
+		echo_info "Updating..."
+		cd $3
+		echo_info "Switching to branch $2"
+		git checkout $2
+		git pull
+		cd - >/dev/null
+	else
+		echo_info "Cloning..."
+		git clone $1 $3
+		cd $3
+		echo_info "Switching to branch $2"
+		git checkout $2
+		cd - >/dev/null
+	fi
+}
 

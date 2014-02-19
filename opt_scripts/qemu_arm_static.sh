@@ -21,22 +21,41 @@
 
 set -e
 
-ORIG=$PWD
-mkdir -p raspberrypi
-cd raspberrypi
-if [ -d $PWD/linux ];then
-	echo "[I] Updating linux kernel source ..."
-	cd $PWD/linux
-	git pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning linux kernel source..."
-	git clone https://github.com/raspberrypi/linux.git
-fi
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_functions/general.sh
+PNAME="qemu"
 
-echo "[I] Making headers..."
-[ -d $ORIG/target_linux_headers ] || mkdir $ORIG/target_linux_headers
-cd $ORIG/raspberrypi/linux/
-CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} make headers_install INSTALL_HDR_PATH=$ORIG/target_linux_headers
+# $1 repository, $2 branch, $3 directory
+echo_info "qemu"
+git_down_upd git://git.qemu-project.org/qemu.git stable-1.6 $ORIG/resources/qemu
 
+cd $ORIG/resources/qemu
 
+unset CC
+unset CPP
+unset CXX
+unset LD
+unset NM
+unset AR
+unset RANLIB
+unset ARCH
+unset CROSS_COMPILE
+unset QEMU_LD_PREFIX
+unset LD_LIBRARY_PATH
+unset LDFLAGS
+
+echo_info "$PNAME Cleaning qemu..."
+make clean || echo "Nothing to clean"
+
+echo_info "$PNAME Configuring..."
+./configure --disable-kvm --target-list="arm-softmmu arm-linux-user" --disable-sdl --prefix=$ORIG/host/ 
+
+echo_info "$PNAME Building..."
+make -j $NUMCORES
+
+echo_info "$PNAME Installing..."
+mkdir -p $ORIG/host
+make -j $NUMCORES install
+
+echo_info "$PNAME setting up binfmt. ARM will be exec by $ORIG"
+sudo $ORIG/scripts_utils/enable_arm_binfmt.sh $ORIG/host/bin/qemu-arm
