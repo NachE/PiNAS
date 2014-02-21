@@ -21,69 +21,44 @@
 
 set -e
 
-ORIG=$PWD
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_functions/general.sh
+PNAME="linux kernel"
 
-if [ ! -d raspberrypi/ ];then
-	mkdir raspberrypi
-fi
-cd raspberrypi/
+git_down_upd https://github.com/raspberrypi/linux.git . $ORIG/raspberrypi/linux 
 
-if [ -d $PWD/tools ];then
-	echo "[I] Updating compiler..."
-	cd $PWD/tools
-	git pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning compiler..."
-	git clone https://github.com/raspberrypi/tools.git
+CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
 
-fi
-
-if [ -d $PWD/linux ];then
-	echo "[I] Updating linux kernel source ..."
-	cd $PWD/linux
-	git pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning linux kernel source..."
-	git clone https://github.com/raspberrypi/linux.git
-fi
-
-
-CCPREFIX=$PWD/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
-cd linux/
-echo "[I] Cleaning..."
+cd $ORIG/raspberrypi/linux
+echo_info "Cleaning..."
 make mrproper
-echo "[I] Using config arch/arm/configs/bcmrpi_defconfig"
+echo_info "Using config arch/arm/configs/bcmrpi_defconfig"
 cp arch/arm/configs/bcmrpi_defconfig ./.config
-echo "[I] Setting squashfs compiled into kernel..."
+echo_info "Setting squashfs compiled into kernel..."
 sed -i -e "s/^CONFIG_SQUASHFS=.*/CONFIG_SQUASHFS=y/" .config
 
-
 EXTVER=-PiNAS-`date +%Y%m%d%H%M`
-echo "[I] Seting extraversion $EXTVER"
+echo_info "Seting extraversion $EXTVER"
 sed -i -e "s/^EXTRAVERSION =.*/EXTRAVERSION = $EXTVER/" Makefile
 
-echo "[I] Making config..."
+echo_info "Making config..."
 make ARCH=arm CROSS_COMPILE=${CCPREFIX} olddefconfig
 #diff .config arch/arm/configs/bcmrpi_defconfig
 
-echo "[I] Compiling Kernel... make coffee."
+echo_info "Compiling Kernel... make coffee."
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX}
 
-echo "[I] Compiling Modules..."
+echo_info "Compiling Modules..."
 make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} modules
 
-if [ ! -d ../compiled ];then
-	mkdir ../compiled
-fi
+mkdir -p ../compiled
 
-echo "[I] Building modules dir..."
-MODULES_TARGET_DIR=../../target/
-make ARCH=arm CROSS_COMPILE=${CCPREFIX} INSTALL_MOD_PATH=${MODULES_TARGET_DIR} modules_install
+echo_info "Building modules dir..."
+MODULES_TARGET_DIR=$ORIG/target/
+sudo make ARCH=arm CROSS_COMPILE=${CCPREFIX} INSTALL_MOD_PATH=${MODULES_TARGET_DIR} modules_install
 
-echo "[I] Copying Kernel image..."
+echo_info "Copying Kernel image..."
 cp arch/arm/boot/zImage ../compiled/kernel.img
 
 cd $ORIG

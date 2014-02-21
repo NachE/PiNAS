@@ -24,15 +24,18 @@ set -e
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 
 function echo_info {
-	echo -e '\E[37;32m'"\033[1m[I] ===> $1\033[0m"
+	[ -n "$PNAME" ] || PNAME = "??"
+	echo -e '\E[37;32m'"\033[1m[I] ===> [$PNAME] $1\033[0m"
 }
 
 function exit_msg {
-	echo -e '\E[37;31m'"\033[1m[E] !!!> $1\033[0m"
+	[ -n "$PNAME" ] || PNAME = "??"
+	echo -e '\E[37;31m'"\033[1m[E] !!!> [$PNAME] $1\033[0m"
 }
 
 # $1 repository, $2 branch, $3 directory
 function git_down_upd {
+	mkdir -p $(dirname $3)
 	if [ -d $3 ];then
 		echo_info "Updating..."
 		cd $3
@@ -49,7 +52,6 @@ function git_down_upd {
 		cd - >/dev/null
 	fi
 }
-
 
 function get_qemu_arm_path {
 	if [ -f $ORIG/host/bin/qemu-arm ]; then
