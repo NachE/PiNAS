@@ -21,16 +21,12 @@
 
 set -e
 
+PNAME="busybox"
 ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_config/environment_vars.sh
 . $ORIG/scripts_functions/general.sh
 
-PNAME="busybox"
-
 git_down_upd git://busybox.net/busybox.git . $RESOURCESDIR/busybox
-
-echo_info "CC prefix: $CCPREFIX"
-echo_info "CPU Cores: $NUMCORES"
 
 cd $RESOURCESDIR/busybox/
 sudo make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
@@ -40,7 +36,7 @@ make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM
 
 cd $ORIG
 
-echo_info "Making initial directories on target/"
+echo_info "Making initial directories on $TARGETDIR"
 #####
 #Extracted from LFS doc
 sudo mkdir -p $TARGETDIR/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}

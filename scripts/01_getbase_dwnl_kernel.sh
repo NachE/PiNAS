@@ -21,17 +21,18 @@
 
 set -e
 
-ORIG=$(cd $(dirname "$0")/../; pwd)
-. $ORIG/scripts_functions/general.sh
 PNAME="kernel headers"
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_config/environment_vars.sh
+. $ORIG/scripts_functions/general.sh
 
-git_down_upd https://github.com/raspberrypi/linux.git . $ORIG/raspberrypi/linux
+git_down_upd https://github.com/raspberrypi/linux.git . $RESOURCESDIR/raspberrypi/linux
 
-echo_info "Installing headers on $ORIG/target_linux_headers..."
-mkdir -p $ORIG/target_linux_headers
-cd $ORIG/raspberrypi/linux/
-CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} make headers_install INSTALL_HDR_PATH=$ORIG/target_linux_headers
+echo_info "Installing headers on $HEADERS_TARGET_DIR"
+mkdir -p $HEADERS_TARGET_DIR
+cd $RESOURCESDIR/raspberrypi/linux/
+CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} make headers_install INSTALL_HDR_PATH=$HEADERS_TARGET_DIR
 
-echo_info "Now headers are on $ORIG/target_linux_headers"
-echo_info "Now Kernel src are on $ORIG/raspberrypi/linux"
+echo_info "Now headers are on $HEADERS_TARGET_DIR"
+echo_info "Now Kernel src are on $RESOURCESDIR/raspberrypi/linux"
 

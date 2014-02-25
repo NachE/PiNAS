@@ -21,49 +21,29 @@
 
 set -e
 
+PNAME="busybox"
 ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_config/environment_vars.sh
 . $ORIG/scripts_functions/general.sh
-PNAME="uclibc"
 
-cd resources/
-if [ -d $PWD/uclibc ];then
-	echo "[I] Updating uclibc src..."
-	cd $PWD/uclibc
-	git pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning uclibc src..."
-	git clone git://uclibc.org/uClibc.git uclibc
-	cd $PWD/uclibc/
-	git checkout 0.9.33
-	cd - >/dev/null
-fi
-cd uclibc
+git_down_upd git://uclibc.org/uClibc.git 0.9.33 $RESOURCESDIR/uclibc
+cd $RESOURCESDIR/uclibc
 
-#CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
-#LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/
-CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
-LIBPATH=$ORIG/resources/buildroot/output/staging/
-#CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}/usr/lib/ LDFLAGS="-L${LIBPATH}/usr/lib/"
-
-
-echo_info $PNAME
-
-echo_info "$PNAME Cleaning..."
+echo_info "Cleaning..."
 sudo make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} clean || echo "Nothing to clean"
 
-echo_info "$PNAME Configuring..."
+echo_info "Configuring..."
 cp $ORIG/config/uclibc.conf ./.config
-LINUXPATH=$ORIG/target_linux_headers/include/
-sed -i -e "s+^KERNEL_HEADERS=.*+KERNEL_HEADERS=\"$LINUXPATH\"+" .config
+
+sed -i -e "s+^KERNEL_HEADERS=.*+KERNEL_HEADERS=\"$HEADERSINCLUDE\"+" .config
 
 make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} oldconfig
 
-echo_info "$PNAME Building..."
+echo_info "Building..."
 make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH}
 
-echo_info "$PNAME Installing..."
-[ -d $ORIG/target ] || mkdir $ORIG/target
-sudo make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} PREFIX=$ORIG/target install
+echo_info "Installing..."
+mkdir -p $TARGETDIR
+sudo make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} PREFIX=$TARGETDIR install
 
 

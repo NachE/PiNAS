@@ -21,49 +21,45 @@
 
 set -e
 
-ORIG=$(cd $(dirname "$0")/../; pwd)
-. $ORIG/scripts_functions/general.sh
 PNAME="python"
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_config/environment_vars.sh
+. $ORIG/scripts_functions/general.sh
 
 cd resources/
-if [ -d $PWD/cpython ];then
+if [ -d $RESOURCESDIR/cpython ];then
 	echo "[I] Updating python src..."
-	cd $PWD/cpython
+	cd $RESOURCESDIR/cpython
 	hg pull
 	cd - >/dev/null
 else
 	echo "[I] Cloning python src..."
 	hg clone http://hg.python.org/cpython
 	echo "[I] Switching to 2.7 branch..."
-	cd $PWD/cpython
+	cd $RESOURCESDIR/cpython
 	hg update -C 2.7
 fi
 
 echo_info "Making CONFIG_SITE file..."
-echo -e "ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n" > $ORIG/resources/cpython/configsite.pinas
+echo -e "ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n" > $RESOURCESDIR/cpython/configsite.pinas
 cd $ORIG
 
-echo_info "Setting env vars"
-CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
-#CCPREFIX=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin/arm-linux-gnueabihf-
-LIBPATH=$ORIG/resources/buildroot/output/staging/
-#On CentOS you can use "scl enable python27 bash" after install python27 with scl
+echo_info "Setting special env vars"
+# On CentOS you can use "scl enable python27 bash" after install python27 with scl
+# or maybe you want to build fresh version... (recomended)
 PYTHONLIBPATH1=$(python-config --prefix)/lib/
 PYTHONLIBPATH2=$(python-config --prefix)/lib64/
-#LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/
-#CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}/usr/lib/ LDFLAGS="-L${LIBPATH}/usr/lib/"
-TOOLCHAINPATH=$ORIG/resources/buildroot/output/staging/
 
 echo_info "$PNAME Setting up arm binfmt..."
 sudo $ORIG/scripts_utils/enable_arm_binfmt.sh
 
 echo_info "$PNAME Compiling python..."
-cd resources/cpython
+cd $RESOURCESDIR/cpython
 
 make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/;$PYTHONLIBPATH1;$PYTHONLIBPATH2" LDFLAGS="-L${LIBPATH}usr/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} clean || echo "Nothing to clean"
 
 echo_info "$PNAME Configuring src before build..."
-ARCH=arm CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/;$PYTHONLIBPATH1;$PYTHONLIBPATH2" LDFLAGS="-L${LIBPATH}usr/lib/" CROSS_COMPILE=${CCPREFIX} CONFIG_SITE=configsite.pinas QEMU_LD_PREFIX=${LIBPATH} ./configure --prefix=${TOOLCHAINPATH}  --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --disable-ipv6 --without-pydebug --disable-nis 
+ARCH=arm CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/;$PYTHONLIBPATH1;$PYTHONLIBPATH2" LDFLAGS="-L${LIBPATH}usr/lib/" CROSS_COMPILE=${CCPREFIX} CONFIG_SITE=configsite.pinas QEMU_LD_PREFIX=${LIBPATH} ./configure --prefix=${LIBPATH}  --host=arm-linux --build=i686-pc-linux-gnu --enable-shared --disable-ipv6 --without-pydebug --disable-nis 
 
 echo_info "$PNAME Building..."
 make -j 1 CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/;$PYTHONLIBPATH1;$PYTHONLIBPATH2" LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH}

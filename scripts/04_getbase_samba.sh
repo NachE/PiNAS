@@ -21,42 +21,24 @@
 
 set -e
 
+PNAME="busybox"
 ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_config/environment_vars.sh
 . $ORIG/scripts_functions/general.sh
-PNAME="samba"
 
-cd resources/
-if [ -d $PWD/samba ];then
-	echo "[I] Updating samba src..."
-	cd $PWD/samba
-	git pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning samba src..."
-	git clone git://git.samba.org/samba.git
-	echo "[I] Switching to v4-0-stable..."
-	cd $PWD/samba
-	git checkout v4-0-stable
-fi
-cd $ORIG
+git_down_upd //git.samba.org/samba.git v4-0-stable $RESOURCESDIR/samba
+cd $RESOURCESDIR/samba
 
-
-echo_info "$PNAME Setting up env vars..."
+echo_info "Setting up special env vars..."
 QEMUARMBIN=$(get_qemu_arm_path)
-
-CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
-
-LIBPATH=$ORIG/resources/buildroot/output/staging/
 
 LIBPATH_PYTHON=$LIBPATH/lib/
 PYTHONINCLUDE=$LIBPATH/include/python2.7/
-PYTHON_CFG_BINARY=$ORIG/resources/buildroot/output/staging/bin/python-config
-
-cd $ORIG/resources/samba
+PYTHON_CFG_BINARY=$RESOURCESDIR/buildroot/output/staging/bin/python-config
 
 #####################
 
-echo_info "$PNAME Cleaning..."
+echo_info "Cleaning..."
 
 PYTHON_CONFIG="${PYTHON_CFG_BINARY}" CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" \
 	CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" \
@@ -67,11 +49,11 @@ PYTHON_CONFIG="${PYTHON_CFG_BINARY}" CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" \
 
 #####################
 
-echo_info "$PNAME Setting up arm binfmt..."
+echo_info "Setting up arm binfmt..."
 sudo $ORIG/scripts_utils/enable_arm_binfmt.sh
 
-echo_info "$PNAME Configuring src before build..."
-echo_info "$PNAME Using ${LIBPATH} as elf interpreter prefix..." 
+echo_info "Configuring src before build..."
+echo_info "Using ${LIBPATH} as elf interpreter prefix..." 
 
 #####################
 PYTHON_CONFIG="${PYTHON_CFG_BINARY}" ARCH="arm" CC="${CCPREFIX}gcc" \
@@ -107,10 +89,10 @@ PYTHON_CONFIG="${PYTHON_CFG_BINARY}" ARCH="arm" CC="${CCPREFIX}gcc" \
 		--nopyc \
 		--nopyo \
 		--fatal-errors \
-		--prefix=$ORIG/target/ \
+		--prefix=$TARGETDIR \
 		--cross-compile \
 		--cross-execute="$QEMUARMBIN -L ${LIBPATH}" \
-		--destdir=$ORIG/target/ \
+		--destdir=$TARGETDIR \
 		--disable-ntdb \
 		--disable-pthreadpool \
 		--disable-rpath \
@@ -119,8 +101,7 @@ PYTHON_CONFIG="${PYTHON_CFG_BINARY}" ARCH="arm" CC="${CCPREFIX}gcc" \
 # Future options: --without-regedit --disable-glusterfs
 #####################
 
-
-echo_info "$PNAME Building..."
+echo_info "Building..."
 PYTHON_CONFIG="${PYTHON_CFG_BINARY}" CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" \
 	CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" \
 	AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib"  \
@@ -132,7 +113,7 @@ PYTHON_CONFIG="${PYTHON_CFG_BINARY}" CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" \
 #####################
 
 
-echo_info "$PNAME Installing..."
+echo_info "Installing..."
 sudo PYTHON_CONFIG=${PYTHON_CFG_BINARY} CC="${CCPREFIX}gcc" CPP="${CCPREFIX}cpp" \
 	CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" \
 	AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" \
