@@ -21,17 +21,9 @@
 
 set -e
 
-ORIG=$(cd $(dirname "$0")/../; pwd)
-. $ORIG/scripts_functions/general.sh
-PNAME="kernel headers"
+[ -n "$ORIG" ] || ORIG=$(cd $(dirname "$0")/../; pwd)
 
-git_down_upd https://github.com/raspberrypi/linux.git . $ORIG/raspberrypi/linux
-
-echo_info "Installing headers on $ORIG/target_linux_headers..."
-mkdir -p $ORIG/target_linux_headers
-cd $ORIG/raspberrypi/linux/
-CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} make headers_install INSTALL_HDR_PATH=$ORIG/target_linux_headers
-
-echo_info "Now headers are on $ORIG/target_linux_headers"
-echo_info "Now Kernel src are on $ORIG/raspberrypi/linux"
+NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
+CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
+LIBPATH=$ORIG/resources/buildroot/output/staging/
 

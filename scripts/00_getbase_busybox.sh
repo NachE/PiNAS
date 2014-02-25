@@ -23,48 +23,19 @@ set -e
 
 ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_functions/general.sh
+. $ORIG/scripts_config/environment_vars.sh
+
 PNAME="busybox"
-#if [ ! -d raspberrypi/ ];then
-#	mkdir raspberrypi
-#fi
-#cd raspberrypi/
-#if [ -d $PWD/tools ];then
-#	echo "[I] Updating compiler..."
-#	cd $PWD/tools
-#	git pull
-#	cd - >/dev/null
-#else
-#	echo "[I] Cloning compiler..."
-#	git clone https://github.com/raspberrypi/tools.git
-#
-#fi
-#cd $ORIG
 
+git_down_upd git://busybox.net/busybox.git . $ORIG/resources/busybox
 
-cd resources/
-if [ -d $PWD/busybox ];then
-	echo "[I] Updating busybox src..."
-	cd $PWD/busybox
-	git pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning busybox src..."
-	git clone git://busybox.net/busybox.git
-fi
-cd $ORIG
+echo_info "Setting env vars..."
+#CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
+#LIBPATH=$ORIG/resources/buildroot/output/staging/
 
-
-
-echo_info "$PNAME Compiling..."
-CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
 echo_info "CC prefix: $CCPREFIX"
-NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
+#NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 echo_info "CPU Cores: $NUMCORES"
-
-
-LIBPATH=$ORIG/resources/buildroot/output/staging/
-#LIBPATH=$ORIG/raspberrypi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/arm-linux-gnueabihf/libc/
-
 
 cd $PWD/resources/busybox/
 sudo make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
@@ -75,7 +46,7 @@ make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM
 
 cd $ORIG
 
-echo_info "$PNAME Making initial directories on target/"
+echo_info "Making initial directories on target/"
 #####
 #Extracted from LFS doc
 sudo mkdir -p $PWD/target/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}
@@ -96,20 +67,10 @@ sudo mkdir -p $PWD/target/var/{opt,cache,lib/{misc,locate},local}
 
 sudo mkdir -p $PWD/target/{sys,dev,proc}
 
-echo_info "$PNAME Installing busybox on target/"
+echo_info "Installing busybox on target/"
 cd $PWD/resources/busybox/
 sudo make ARCH=arm CROSS_COMPILE=${CCPREFIX} CONFIG_PREFIX=$ORIG/target/ install
-echo_info "$PNAME setting busybox setuid..."
+echo_info "Setting busybox setuid..."
 sudo chown root.root $ORIG/target/bin/busybox
 sudo chmod u+s $ORIG/target/bin/busybox
-
-#cp $PWD/resources/busybox/busybox $PWD/target/bin
-
-
-
-
-
-
-
-
 

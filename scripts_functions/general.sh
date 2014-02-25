@@ -24,12 +24,12 @@ set -e
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 
 function echo_info {
-	[ -n "$PNAME" ] || PNAME = "??"
+	[ -n "$PNAME" ] || PNAME="??"
 	echo -e '\E[37;32m'"\033[1m[I] ===> [$PNAME] $1\033[0m"
 }
 
 function exit_msg {
-	[ -n "$PNAME" ] || PNAME = "??"
+	[ -n "$PNAME" ] || PNAME="??"
 	echo -e '\E[37;31m'"\033[1m[E] !!!> [$PNAME] $1\033[0m"
 }
 
@@ -37,18 +37,32 @@ function exit_msg {
 function git_down_upd {
 	mkdir -p $(dirname $3)
 	if [ -d $3 ];then
-		echo_info "Updating..."
 		cd $3
-		echo_info "Switching to branch $2"
-		git checkout $2
+		if [ $2 == "." ];then
+			echo_info "Resetting git dir..."
+			git checkout .
+		else
+			echo_info "Resetting git dir..."
+			git checkout .
+			echo_info "Switching to branch $2..."
+			git checkout $2
+		fi
+		echo_info "Updating..."
 		git pull
 		cd - >/dev/null
 	else
 		echo_info "Cloning..."
 		git clone $1 $3
 		cd $3
-		echo_info "Switching to branch $2"
-		git checkout $2
+		if [ $2 == "." ];then
+			echo_info "Resetting git dir..."
+			git checkout .
+		else
+			echo_info "Resetting git dir..."
+			git checkout .
+			echo_info "Switching to branch $2..."
+			git checkout $2
+		fi
 		cd - >/dev/null
 	fi
 }
