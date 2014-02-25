@@ -22,8 +22,17 @@
 set -e
 
 [ -n "$ORIG" ] || ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_functions/general.sh
 
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
-CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
-LIBPATH=$ORIG/resources/buildroot/output/staging/
+RESOURCESDIR="$ORIG/resources/"
+TARGETDIR="$ORIG/target/"
+CCPREFIX="$RESOURCESDIR/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-"
+LIBPATH="$RESOURCESDIR/buildroot/output/staging/"
+
+echo_info "NUMCORES: $NUMCORES"
+echo_info "RESOURCESDIR: $RESOURCESDIR"
+echo_info "TARGETDIR: $TARGETDIR"
+echo_info "CCPREFIX: $CCPREFIX"
+echo_info "LIBPATH: $CCPREFIX"
 

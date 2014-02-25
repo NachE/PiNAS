@@ -23,6 +23,8 @@ set -e
 
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 
+
+
 function echo_info {
 	[ -n "$PNAME" ] || PNAME="??"
 	echo -e '\E[37;32m'"\033[1m[I] ===> [$PNAME] $1\033[0m"
@@ -31,6 +33,7 @@ function echo_info {
 function exit_msg {
 	[ -n "$PNAME" ] || PNAME="??"
 	echo -e '\E[37;31m'"\033[1m[E] !!!> [$PNAME] $1\033[0m"
+	exit 1
 }
 
 # $1 repository, $2 branch, $3 directory

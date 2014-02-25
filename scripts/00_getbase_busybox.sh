@@ -22,25 +22,19 @@
 set -e
 
 ORIG=$(cd $(dirname "$0")/../; pwd)
-. $ORIG/scripts_functions/general.sh
 . $ORIG/scripts_config/environment_vars.sh
+. $ORIG/scripts_functions/general.sh
 
 PNAME="busybox"
 
-git_down_upd git://busybox.net/busybox.git . $ORIG/resources/busybox
-
-echo_info "Setting env vars..."
-#CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
-#LIBPATH=$ORIG/resources/buildroot/output/staging/
+git_down_upd git://busybox.net/busybox.git . $RESOURCESDIR/busybox
 
 echo_info "CC prefix: $CCPREFIX"
-#NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 echo_info "CPU Cores: $NUMCORES"
 
-cd $PWD/resources/busybox/
+cd $RESOURCESDIR/busybox/
 sudo make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
 cp $ORIG/config/busybox.conf ./.config
-#make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX}
 
 make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH=${LIBPATH}usr/lib/ LDFLAGS="-L${LIBPATH}usr/lib/ -L${LIBPATH}" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH}
 
@@ -49,28 +43,28 @@ cd $ORIG
 echo_info "Making initial directories on target/"
 #####
 #Extracted from LFS doc
-sudo mkdir -p $PWD/target/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}
-sudo mkdir -p $PWD/target/{media/{floppy,cdrom},sbin,srv,var}
-sudo install -dv -m 0750 $PWD/target/root
-sudo install -dv -m 1777 $PWD/target/tmp $PWD/target/var/tmp
-sudo mkdir -p $PWD/target/usr/{,local/}{bin,include,lib,sbin,src}
-sudo mkdir -p $PWD/target/usr/{,local/}share/{doc,info,locale,man}
-sudo mkdir -p  $PWD/target/usr/{,local/}share/{misc,terminfo,zoneinfo}
-sudo mkdir -p $PWD/target/usr/{,local/}share/man/man{1..8}
-for dir in $PWD/target/usr $PWD/target/usr/local; do
+sudo mkdir -p $TARGETDIR/{bin,boot,etc/{opt,sysconfig},home,lib,mnt,opt,run}
+sudo mkdir -p $TARGETDIR/{media/{floppy,cdrom},sbin,srv,var}
+sudo install -dv -m 0750 $TARGETDIR/root
+sudo install -dv -m 1777 $TARGETDIR/tmp $TARGETDIR/var/tmp
+sudo mkdir -p $TARGETDIR/usr/{,local/}{bin,include,lib,sbin,src}
+sudo mkdir -p $TARGETDIR/usr/{,local/}share/{doc,info,locale,man}
+sudo mkdir -p  $TARGETDIR/usr/{,local/}share/{misc,terminfo,zoneinfo}
+sudo mkdir -p $TARGETDIR/usr/{,local/}share/man/man{1..8}
+for dir in $TARGETDIR/usr $TARGETDIR/usr/local; do
   sudo ln -sf share/{man,doc,info} $dir
 done
-sudo mkdir -p $PWD/target/var/{log,mail,spool}
-sudo ln -sf $PWD/target/run $PWD/target/var/run
-sudo ln -sf $PWD/target/run/lock $PWD/target/var/lock
-sudo mkdir -p $PWD/target/var/{opt,cache,lib/{misc,locate},local}
+sudo mkdir -p $TARGETDIR/var/{log,mail,spool}
+sudo ln -sf $TARGETDIR/run $TARGETDIR/var/run
+sudo ln -sf $TARGETDIR/run/lock $TARGETDIR/var/lock
+sudo mkdir -p $TARGETDIR/var/{opt,cache,lib/{misc,locate},local}
 
-sudo mkdir -p $PWD/target/{sys,dev,proc}
+sudo mkdir -p $TARGETDIR/{sys,dev,proc}
 
-echo_info "Installing busybox on target/"
-cd $PWD/resources/busybox/
-sudo make ARCH=arm CROSS_COMPILE=${CCPREFIX} CONFIG_PREFIX=$ORIG/target/ install
+echo_info "Installing busybox on $TARGETDIR"
+cd $RESOURCESDIR/busybox/
+sudo make ARCH=arm CROSS_COMPILE=${CCPREFIX} CONFIG_PREFIX=$TARGETDIR/ install
 echo_info "Setting busybox setuid..."
-sudo chown root.root $ORIG/target/bin/busybox
-sudo chmod u+s $ORIG/target/bin/busybox
+sudo chown root.root $TARGETDIR/bin/busybox
+sudo chmod u+s $TARGETDIR/bin/busybox
 
