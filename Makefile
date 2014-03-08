@@ -4,7 +4,7 @@ all:
 
 base:
 	scripts/00_getbase_busybox.sh
-	scripts/01_getbase_dwnl_kernel.sh
+	scripts/01_getbase_kernel_headers.sh
 	scripts/02_getbase_uclibc.sh
 	scripts/03_getbase_python.sh
 	scripts/04_getbase_samba.sh
@@ -12,7 +12,7 @@ base:
 busybox:
 	scripts/00_getbase_busybox.sh
 kernel_headers:
-	scripts/01_getbase_dwnl_kernel.sh
+	scripts/01_getbase_kernel_headers.sh
 uclibc:
 	scripts/02_getbase_uclibc.sh
 python:
@@ -22,7 +22,6 @@ samba:
 
 upchroot:
 	scripts/10_preparechroot.sh
-	scripts/20_configurechroot.sh
 
 downchroot:
 	scripts/90_finishchroot.sh

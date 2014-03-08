@@ -21,6 +21,12 @@
 
 set -e
 
-echo "[I] Preparing chroot..."
-cp /usr/bin/qemu-arm-static target/usr/bin
-mount -o bind /proc $PWD/target/proc
+PNAME="Chroot up"
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_config/environment_vars.sh
+. $ORIG/scripts_functions/general.sh
+
+#THIS COULD BE DEPRECATED!!!!
+echo_info "Preparing chroot..."
+cp /usr/bin/qemu-arm-static $TARGETDIR/usr/bin
+mount -o bind /proc $TARGETDIR/proc
