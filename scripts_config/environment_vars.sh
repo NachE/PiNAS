@@ -27,10 +27,13 @@ set -e
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 RESOURCESDIR="$ORIG/resources/"
 TARGETDIR="$ORIG/target/"
+INITRAMFSDIR="$ORIG/initramfs/"
 HEADERS_TARGET_DIR="$ORIG/target_linux_headers"
 HEADERSINCLUDE="$HEADERS_TARGET_DIR/include/"
 CCPREFIX="$RESOURCESDIR/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-"
 LIBPATH="$RESOURCESDIR/buildroot/output/staging/"
+
+
 
 echo -e "\n"
 echo_info "********** ENVIRONMENT VARS INFO *********"
@@ -39,6 +42,7 @@ echo_info "* You can change these values on $ORIG/scripts_config/environment_var
 echo_info "* NUMCORES: $NUMCORES"
 echo_info "* RESOURCESDIR: $RESOURCESDIR"
 echo_info "* TARGETDIR: $TARGETDIR"
+echo_info "* INITRAMFS: $INITRAMFSDIR"
 echo_info "* HEADERS_TARGET_DIR: $HEADERS_TARGET_DIR"
 echo_info "* HEADERSINCLUDE: $HEADERSINCLUDE"
 echo_info "* CCPREFIX: $CCPREFIX"

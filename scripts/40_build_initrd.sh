@@ -21,29 +21,36 @@
 
 set -e
 
-echo "[I] Building initrd.gz..."
+PNAME="initrd"
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_config/environment_vars.sh
+. $ORIG/scripts_functions/general.sh
 
-[ -d $PWD/initramfs ] || mkdir $PWD/initramfs
-mkdir -p $PWD/initramfs/{bin,sbin,etc,proc,sys,dev,tmp,run,root,media,var,lib}
-mkdir -p $PWD/initramfs/usr/{bin,sbin}
-chmod 777 $PWD/initramfs/tmp
 
-rm -rf $PWD/initramfs/dev/console
-mknod -m 622 $PWD/initramfs/dev/console c 5 1
-rm -rf $PWD/initramfs/dev/tty0
-mknod -m 622 $PWD/initramfs/dev/tty0 c 4 0
-touch $PWD/initramfs/etc/mdev.conf
+sudo rm -rf $INITRAMFSDIR
+mkdir $INITRAMFSDIR
+sudo mkdir -p $INITRAMFSDIR/{bin,sbin,etc,proc,sys,dev,tmp,run,root,media,var,lib}
+sudo mkdir -p $INITRAMFSDIR/usr/{bin,sbin}
+sudo chmod 777 $INITRAMFSDIR/tmp
 
-cp $PWD/target/bin/busybox $PWD/initramfs/bin/
+sudo rm -rf $INITRAMFSDIR/dev/console
+sudo mknod -m 622 $INITRAMFSDIR/dev/console c 5 1
+sudo rm -rf $INITRAMFSDIR/dev/tty0
+sudo mknod -m 622 $INITRAMFSDIR/dev/tty0 c 4 0
+sudo touch $INITRAMFSDIR/etc/mdev.conf
 
-cp $PWD/resources/init $PWD/initramfs/
-chmod a+x $PWD/initramfs/init
+sudo cp $TARGETDIR/bin/busybox $INITRAMFSDIR/bin/
 
-cd $PWD/initramfs/bin/
-ln -sf busybox sh
+
+sudo cp $RESOURCESDIR/init $INITRAMFSDIR/
+sudo chown root.root $INITRAMFSDIR/init
+sudo chmod a+x $INITRAMFSDIR/init
+
+cd $INITRAMFSDIR/bin/
+sudo ln -sf busybox sh
 cd - >/dev/null
 
-cd $PWD/initramfs
-find ./ | cpio -H newc -o > ../initrd.cpio
+cd $INITRAMFSDIR
+sudo find ./ | cpio -H newc -o > ../initrd.cpio
 cd - >/dev/null
 gzip -c initrd.cpio > initrd.gz
