@@ -21,25 +21,16 @@
 
 set -e
 
-ORIG=$PWD
+PNAME="toolchain"
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_config/environment_vars.sh
+. $ORIG/scripts_functions/general.sh
 
-cd resources/
-if [ -d $PWD/buildroot ];then
-	echo "[I] Updating uclibc buildroot src..."
-	cd $ORIG/resources/buildroot
-	git checkout 2013.08.x
-	git pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning uclibc buildroot src..."
-	git clone git://git.buildroot.net/buildroot
-	cd $ORIG/resources/buildroot
-	git checkout 2013.08.x
-fi
-cd $ORIG/resources/buildroot
+git_down_upd git://git.buildroot.net/buildroot 2013.08.x $RESOURCESDIR/buildroot
+cd $RESOURCESDIR/buildroot
 
-NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
-
+unset CCPREFIX
+unset LIBPATH
 unset CC
 unset CPP
 unset CXX
@@ -53,24 +44,16 @@ unset QEMU_LD_PREFIX
 unset LD_LIBRARY_PATH
 unset LDFLAGS
 
-echo "[I] Cleaning buildroot..."
-make clean || echo "Nothing to clean"
-make distclean || echo "Nothing to clean"
+echo_info "Cleaning buildroot..."
+make clean || echo_info "Nothing to clean"
+make distclean || echo_info "Nothing to clean"
 
-
-echo "[I] Configuring..."
+echo_info "Configuring..."
 cp $ORIG/config/uclibc.conf $ORIG/resources/buildroot/package/uclibc/uClibc-snapshot.config.pinas
 cp $ORIG/config/buildroot.conf ./.config
 
 make olddefconfig
 
-echo "[I] Building..."
+echo_info "Building..."
 make toolchain
-
-
-
-
-
-
-
 
