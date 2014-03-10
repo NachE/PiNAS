@@ -53,19 +53,21 @@ function build_sd {
 
 
 
-if [ ! -d $PWD/raspberrypi ];then
-	mkdir $PWD/raspberrypi
-fi
 
-if [ -d $PWD/raspberrypi/firmware ];then
+if [ -d $PWD/firmware ];then
 	echo "[I] Updating boot files..."
-	cd $PWD/raspberrypi/firmware
-	git pull
+	cd $PWD/firmware
+	git pull origin master
 	cd - >/dev/null
 else
 	echo "[I] Cloning boot files from repo..."
-	cd $PWD/raspberrypi
-	git clone https://github.com/raspberrypi/firmware
+	git init firmware
+	cd $PWD/firmware
+	git remote add -f origin https://github.com/raspberrypi/firmware/
+
+	git config core.sparsecheckout true
+	echo boot/ >> .git/info/sparse-checkout
+	git pull origin master
 	cd - >/dev/null
 fi
 
@@ -86,15 +88,12 @@ fi
 #here we mount parts and copy files
 
 	echo "[I] Mounting SD CARD into $PWD/rootmount..."
-	if [ ! -d $PWD/rootmount ];then
-		mkdir rootmount
-	fi
-
+	mkdir -p $PWD/rootmount
 	MOUNTEDSD=$PWD/rootmount
-	mount $SD_DISK1 $PWD/rootmount
+	mount $SD_DISK1 $MOUNTEDSD
 
 	echo "[I] Copying files into SD CARD..."
-	cp -r $PWD/raspberrypi/firmware/boot/* $MOUNTEDSD/
+	cp -r $PWD/firmware/boot/* $MOUNTEDSD/
 	echo "[I] Deleting precompiled kernel from repo..."
 	rm -rf $MOUNTEDSD/kernel.img
 	rm -rf $MOUNTEDSD/kernel_emergency.img
