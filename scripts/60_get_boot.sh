@@ -20,19 +20,25 @@
 ############################################################################
 
 set -e
+PNAME="boot blob"
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_config/environment_vars.sh
+. $ORIG/scripts_functions/general.sh
 
-if [ ! -d $PWD/raspberrypi ];then
-	mkdir $PWD/raspberrypi
-fi
-
-if [ -d $PWD/raspberrypi/firmware ];then
-	echo "[I] Updating boot files..."
-	cd $PWD/raspberrypi/firmware
-	git pull
+if [ -d $ORIG/firmware ];then
+	echo_info "Updating boot files..."
+	cd $ORIG/firmware
+	git pull origin master
 	cd - >/dev/null
 else
-	echo "[I] Cloning boot files from repo..."
-	cd $PWD/raspberrypi
-	git clone https://github.com/raspberrypi/firmware
+	echo_info "Cloning boot files from repo..."
+	git init firmware
+	cd $ORIG/firmware
+	git remote add -f origin https://github.com/raspberrypi/firmware/
+
+	git config core.sparsecheckout true
+	echo boot/ >> .git/info/sparse-checkout
+	git pull origin master
 	cd - >/dev/null
 fi
+

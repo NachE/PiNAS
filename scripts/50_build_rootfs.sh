@@ -21,9 +21,15 @@
 
 set -e
 
-echo "[I] Building rootfs"
+PNAME="busybox"
+ORIG=$(cd $(dirname "$0")/../; pwd)
+. $ORIG/scripts_config/environment_vars.sh
+. $ORIG/scripts_functions/general.sh
 
-mkdir -p $PWD/target/media/{mmcblk0p1,mmcblk0p2}
+echo_info "Building rootfs"
 
-rm -rf $PWD/rootfs.sqfs 
-mksquashfs $PWD/target/ $PWD/rootfs.sqfs
+sudo mkdir -p $TARJETDIR/media/{mmcblk0p1,mmcblk0p2}
+
+rm -rf $ORIG/rootfs.sqfs 
+sudo mksquashfs $TARGETDIR/ $ORIG/rootfs.sqfs
+sudo chown $USER.$USER rootfs.sqfs

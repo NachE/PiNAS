@@ -38,38 +38,7 @@ export SD_DISK=$1
 SD_DISK1=$SD_DISK"1"
 SD_DISK2=$SD_DISK"2"
 
-function msg_and_quit {
-	echo "**************************************"
-	echo "**************************************"
-	echo "*************** ERROR ****************"
-	echo "**************************************"
-	echo "**************************************"
-	echo "[E] An ERROR ocurred making SD"
-        exit 1
-}
-
 function build_sd {
-
-
-
-
-
-if [ -d $PWD/firmware ];then
-	echo "[I] Updating boot files..."
-	cd $PWD/firmware
-	git pull origin master
-	cd - >/dev/null
-else
-	echo "[I] Cloning boot files from repo..."
-	git init firmware
-	cd $PWD/firmware
-	git remote add -f origin https://github.com/raspberrypi/firmware/
-
-	git config core.sparsecheckout true
-	echo boot/ >> .git/info/sparse-checkout
-	git pull origin master
-	cd - >/dev/null
-fi
 
 	echo "[I] Erasing disk $SD_DISK..."
 	parted -s $SD_DISK mklabel msdos
@@ -117,5 +86,5 @@ while [ 1 ]; do
         esac
 done
 
-build_sd || msg_and_quit
+build_sd
 umount $MOUNTEDSD
