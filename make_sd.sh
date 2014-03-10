@@ -19,6 +19,8 @@
 #
 ############################################################################
 
+set -e
+
 echo -e "\n\n PiNAS builder  Copyright (C) 2013  J.A. Nache <ja@nache.net>"
 echo " This program comes with ABSOLUTELY NO WARRANTY."
 echo " This is free software, and you are welcome to redistribute it"
@@ -26,7 +28,10 @@ echo -e " under certain conditions. See LICENSE for more details.\n\n"
 
 
 if [ -z $1 ];then
-	echo -e "\n  Usage: $0 <disk>\n\n"
+	echo -e "\n  Usage: $0 <disk>"
+	echo -e "  Example: $0 /dev/sdb\n\n"
+	echo -e "WARNING! Make sure you know your"
+	echo -e "device name or data will be lost!\n\n"
 	exit 1
 fi
 export SD_DISK=$1
@@ -44,6 +49,9 @@ function msg_and_quit {
 }
 
 function build_sd {
+
+
+
 
 if [ ! -d $PWD/raspberrypi ];then
 	mkdir $PWD/raspberrypi
@@ -99,6 +107,16 @@ fi
 	cp $PWD/raspberrypi/compiled/kernel.img $MOUNTEDSD/
 	cp $PWD/initrd.gz $MOUNTEDSD
 }
+
+echo "WARNING!! You will lose all data that was on $SD_DISK"
+while [ 1 ]; do
+        read -p "Continue (yes/n)? " -r
+        case "$REPLY" in
+          yes ) echo -e "Ok\n"; break;;
+          n|N ) echo -e "Aborting...\n"; exit 1;;
+          * ) echo -e "Error: Type yes or n";;
+        esac
+done
 
 build_sd || msg_and_quit
 umount $MOUNTEDSD
