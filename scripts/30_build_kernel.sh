@@ -25,11 +25,11 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_functions/general.sh
 PNAME="linux kernel"
 
-git_down_upd https://github.com/raspberrypi/linux.git . $ORIG/raspberrypi/linux 
+down_linux
 
 CCPREFIX=$ORIG/resources/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-
 
-cd $ORIG/raspberrypi/linux
+cd $LINUX_DIR
 echo_info "Cleaning..."
 make mrproper
 echo_info "Using config arch/arm/configs/bcmrpi_defconfig"
@@ -55,7 +55,7 @@ make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} modules
 mkdir -p ../compiled
 
 echo_info "Building modules dir..."
-MODULES_TARGET_DIR=$ORIG/target/
+MODULES_TARGET_DIR=$TARGETDIR
 sudo make ARCH=arm CROSS_COMPILE=${CCPREFIX} INSTALL_MOD_PATH=${MODULES_TARGET_DIR} modules_install
 
 echo_info "Copying Kernel image..."

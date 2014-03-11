@@ -34,15 +34,15 @@ boot:
 	scripts/60_get_boot.sh
 
 help:
-	@echo  '  all             - Exec build_pinas.sh'
+	@echo  '  all             - Run all. Disabled.'
 	@echo  '  base            - Build base (busybox, uclibc, *python, samba)'
-	@echo  '  download        - (00) Download all src resources files you need git, hg and cvs'
-	@echo  '  upchroot        - (01) Build busybox'
-	@echo  '  kernel_headers  - (02) Download kernel src and install headers on target_linux_headers'
-	@echo  '  uclibc          - (03) Build uclibc libc libraries'
-	@echo  '  python          - (04) Build python, install on buildroot instead target'
-	@echo  '  samba           - (05) Build samba'
-	@echo  '  dropbear        - (06) Build dropbear'
+	@echo  '  download        - (00 base) Download all src resources files you need git, hg and cvs'
+	@echo  '  upchroot        - (01 base) Build busybox'
+	@echo  '  kernel_headers  - (02 base) Download kernel src and install headers on target_linux_headers'
+	@echo  '  uclibc          - (03 base) Build uclibc libc libraries'
+	@echo  '  python          - (04 base) Build python, install on buildroot instead target'
+	@echo  '  samba           - (05 base) Build samba'
+	@echo  '  dropbear        - (06 base) Build dropbear'
 	@echo  '  kernel          - (30) Download linux src and build kernel/modules'
 	@echo  '  initrd          - (40) Create an initrd.gz'
 	@echo  '  rootfs          - (50) compress target with squashfs'
