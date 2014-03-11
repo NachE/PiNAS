@@ -1,22 +1,23 @@
 base:
-	scripts/00_getbase_busybox.sh
-	scripts/01_getbase_kernel_headers.sh
-	scripts/02_getbase_uclibc.sh
-	scripts/03_getbase_python.sh
-	scripts/04_getbase_samba.sh
+	scripts/01_getbase_busybox.sh
+	scripts/02_getbase_kernel_headers.sh
+	scripts/03_getbase_uclibc.sh
+	scripts/04_getbase_python.sh
+	scripts/05_getbase_samba.sh
+	scripts/06_getbase_dropbear.sh
 
 busybox:
-	scripts/00_getbase_busybox.sh
+	scripts/01_getbase_busybox.sh
 kernel_headers:
-	scripts/01_getbase_kernel_headers.sh
+	scripts/02_getbase_kernel_headers.sh
 uclibc:
-	scripts/02_getbase_uclibc.sh
+	scripts/03_getbase_uclibc.sh
 python:
-	scripts/03_getbase_python.sh
+	scripts/04_getbase_python.sh
 samba:
-	scripts/04_getbase_samba.sh
+	scripts/05_getbase_samba.sh
 dropbear:
-	scripts/05_getbase_dropbear.sh
+	scripts/06_getbase_dropbear.sh
 
 kernel:
 	scripts/30_build_kernel.sh

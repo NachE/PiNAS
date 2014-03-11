@@ -70,6 +70,40 @@ function git_down_upd {
 	fi
 }
 
+# $1 repository, $2 branch, $3 directory
+function hg_down_upd {
+	mkdir -p $(dirname $3)
+	if [ -d $3 ];then
+		cd $3
+		if [ $2 == "." ];then
+			echo_info "Resetting hg dir..."
+			hg update -C
+                else
+			echo_info "Resetting hg dir..."
+			hg update -C
+			echo_info "Switching to branch $2..."
+			hg update -C $2
+		fi
+		echo_info "Updating..."
+		hg pull
+		cd - >/dev/null
+        else
+		echo_info "Cloning..."
+		hg clone $1 $3
+                cd $3
+		if [ $2 == "." ];then
+			echo_info "Resetting hg dir..."
+			hg update -C
+		else
+			echo_info "Resetting hg dir..."
+			hg update -C
+			echo_info "Switching to branch $2..."
+			hg update -C $2
+		fi
+		cd - >/dev/null
+	fi
+}
+
 function get_qemu_arm_path {
 	if [ -f $ORIG/host/bin/qemu-arm ]; then
 		echo "$ORIG/host/bin/qemu-arm"
@@ -81,3 +115,28 @@ function get_qemu_arm_path {
 		echo ""
 	fi
 }
+
+function down_busybox {
+	git_down_upd $BUSYBOX_URL $BUSYBOX_BRANCH $BUSYBOX_DIR
+}
+
+function down_linux {
+	git_down_upd $LINUX_URL $LINUX_BRANCH $LINUX_DIR
+}
+
+function down_uclibc {
+	git_down_upd $UCLIBC_URL $UCLIBC_BRANCH $UCLIBC_DIR
+}
+
+function down_python {
+	hg_down_upd $PYTHON_URL $PYTHON_BRANCH $PYTHON_DIR
+}
+
+function down_samba {
+	git_down_upd $SAMBA_URL $SAMBA_BRANCH $SAMBA_DIR
+}
+
+function down_dropbear {
+	hg_down_upd $DROPBEAR_URL $DROPBEAR_BRANCH $DROPBEAR_DIR
+}
+

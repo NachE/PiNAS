@@ -24,6 +24,8 @@ set -e
 [ -n "$ORIG" ] || ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_functions/general.sh
 
+
+#General
 NUMCORES=$(cat /proc/cpuinfo | grep vendor_id | wc -l)
 RESOURCESDIR="$ORIG/resources/"
 TARGETDIR="$ORIG/target/"
@@ -33,6 +35,31 @@ HEADERSINCLUDE="$HEADERS_TARGET_DIR/include/"
 CCPREFIX="$RESOURCESDIR/buildroot/output/host/usr/bin/arm-buildroot-linux-uclibcgnueabihf-"
 LIBPATH="$RESOURCESDIR/buildroot/output/staging/"
 
+
+#Config
+BUSYBOX_URL="git://busybox.net/busybox.git"
+BUSYBOX_BRANCH="."
+BUSYBOX_DIR="$RESOURCESDIR/busybox"
+
+LINUX_URL="https://github.com/raspberrypi/linux.git"
+LINUX_BRANCH="."
+LINUX_DIR="$RESOURCESDIR/raspberrypi/linux"
+
+UCLIBC_URL="git://uclibc.org/uClibc.git"
+UCLIBC_BRANCH="0.9.33"
+UCLIBC_DIR="$RESOURCESDIR/uclibc"
+
+PYTHON_URL="http://hg.python.org/cpython"
+PYTHON_BRANCH="2.7"
+PYTHON_DIR="$RESOURCESDIR/cpython"
+
+SAMBA_URL="git.samba.org/samba.git"
+SAMBA_BRANCH="v4-0-stable"
+SAMBA_DIR="$RESOURCESDIR/samba"
+
+DROPBEAR_URL="https://secure.ucc.asn.au/hg/dropbear"
+DROPBEAR_BRANCH="."
+DROPBEAR_DIR="$RESOURCESDIR/dropbear"
 
 
 echo -e "\n"

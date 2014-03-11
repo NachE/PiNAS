@@ -26,19 +26,7 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_config/environment_vars.sh
 . $ORIG/scripts_functions/general.sh
 
-cd resources/
-if [ -d $RESOURCESDIR/cpython ];then
-	echo "[I] Updating python src..."
-	cd $RESOURCESDIR/cpython
-	hg pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning python src..."
-	hg clone http://hg.python.org/cpython
-	echo "[I] Switching to 2.7 branch..."
-	cd $RESOURCESDIR/cpython
-	hg update -C 2.7
-fi
+hg_down_upd http://hg.python.org/cpython 2.7 $RESOURCESDIR/cpython
 
 echo_info "Making CONFIG_SITE file..."
 echo -e "ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n" > $RESOURCESDIR/cpython/configsite.pinas
