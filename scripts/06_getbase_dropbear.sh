@@ -26,18 +26,9 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_config/environment_vars.sh
 . $ORIG/scripts_functions/general.sh
 
-cd resources/
-if [ -d $RESOURCESDIR/dropbear ];then
-	echo "[I] Updating dropbear src..."
-	cd $RESOURCESDIR/dropbear
-	hg pull
-	cd - >/dev/null
-else
-	echo "[I] Cloning dropbear src..."
-	hg clone https://secure.ucc.asn.au/hg/dropbear
-fi
-
+down_dropbear
 cd $RESOURCESDIR/dropbear
+
 autoconf
 autoheader
 

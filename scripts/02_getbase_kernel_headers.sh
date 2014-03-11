@@ -26,7 +26,7 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_config/environment_vars.sh
 . $ORIG/scripts_functions/general.sh
 
-git_down_upd https://github.com/raspberrypi/linux.git . $RESOURCESDIR/raspberrypi/linux
+down_linux
 
 echo_info "Installing headers on $HEADERS_TARGET_DIR"
 mkdir -p $HEADERS_TARGET_DIR

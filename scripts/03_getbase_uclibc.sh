@@ -26,7 +26,7 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_config/environment_vars.sh
 . $ORIG/scripts_functions/general.sh
 
-git_down_upd git://uclibc.org/uClibc.git 0.9.33 $RESOURCESDIR/uclibc
+down_uclibc
 cd $RESOURCESDIR/uclibc
 
 echo_info "Cleaning..."

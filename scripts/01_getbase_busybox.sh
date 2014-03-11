@@ -26,7 +26,7 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_config/environment_vars.sh
 . $ORIG/scripts_functions/general.sh
 
-git_down_upd git://busybox.net/busybox.git . $RESOURCESDIR/busybox
+down_busybox
 
 cd $RESOURCESDIR/busybox/
 sudo make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} clean

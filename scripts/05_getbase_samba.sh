@@ -26,7 +26,7 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_config/environment_vars.sh
 . $ORIG/scripts_functions/general.sh
 
-git_down_upd //git.samba.org/samba.git v4-0-stable $RESOURCESDIR/samba
+down_samba
 cd $RESOURCESDIR/samba
 
 echo_info "Setting up special env vars..."
