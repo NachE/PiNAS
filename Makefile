@@ -1,11 +1,13 @@
 base:
+	scripts/00_getbase_download.sh
 	scripts/01_getbase_busybox.sh
 	scripts/02_getbase_kernel_headers.sh
 	scripts/03_getbase_uclibc.sh
 	scripts/04_getbase_python.sh
 	scripts/05_getbase_samba.sh
 	scripts/06_getbase_dropbear.sh
-
+download:
+	scripts/00_getbase_download.sh
 busybox:
 	scripts/01_getbase_busybox.sh
 kernel_headers:
