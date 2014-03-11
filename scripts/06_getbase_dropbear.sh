@@ -27,7 +27,7 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_functions/general.sh
 
 down_dropbear
-cd $RESOURCESDIR/dropbear
+cd $DROPBEAR_DIR
 
 autoconf
 autoheader

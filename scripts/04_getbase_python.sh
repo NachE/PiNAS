@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    PiNAS Linux Distribution builder
-#    Copyright (C) 2013 Juan Antonio Nache <ja@nache.net>
+#    Copyright (C) 2013-2014 Juan Antonio Nache <ja@nache.net>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 down_python
 
 echo_info "Making CONFIG_SITE file..."
-echo -e "ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n" > $RESOURCESDIR/cpython/configsite.pinas
+echo -e "ac_cv_file__dev_ptmx=no\nac_cv_file__dev_ptc=no\n" > $PYTHON_DIR/configsite.pinas
 cd $ORIG
 
 echo_info "Setting special env vars"
@@ -42,7 +42,7 @@ echo_info "$PNAME Setting up arm binfmt..."
 sudo $ORIG/scripts_utils/enable_arm_binfmt.sh
 
 echo_info "$PNAME Compiling python..."
-cd $RESOURCESDIR/cpython
+cd $PYTHON_DIR
 
 make -j $NUMCORES CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" LD_LIBRARY_PATH="${LIBPATH}usr/lib/;$PYTHONLIBPATH1;$PYTHONLIBPATH2" LDFLAGS="-L${LIBPATH}usr/lib/" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} clean || echo "Nothing to clean"
 

@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    PiNAS Linux Distribution builder
-#    Copyright (C) 2013 Juan Antonio Nache <ja@nache.net>
+#    Copyright (C) 2013-2014 Juan Antonio Nache <ja@nache.net>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -30,9 +30,11 @@ down_linux
 
 echo_info "Installing headers on $HEADERS_TARGET_DIR"
 mkdir -p $HEADERS_TARGET_DIR
-cd $RESOURCESDIR/raspberrypi/linux/
+
+#LINUX_DIR are on environment_vars.sh by default it is resources/raspberrypi/linux
+cd $LINUX_DIR
 CC="${CCPREFIX}gcc" CXX="${CCPREFIX}g++" LD="${CCPREFIX}ld" NM="${CCPREFIX}nm" AR="${CCPREFIX}ar" RANLIB="${CCPREFIX}ranlib" ARCH=arm CROSS_COMPILE=${CCPREFIX} QEMU_LD_PREFIX=${LIBPATH} make headers_install INSTALL_HDR_PATH=$HEADERS_TARGET_DIR
 
 echo_info "Now headers are on $HEADERS_TARGET_DIR"
-echo_info "Now Kernel src are on $RESOURCESDIR/raspberrypi/linux"
+echo_info "Now Kernel src are on $LINUX_DIR"
 

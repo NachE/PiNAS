@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    PiNAS Linux Distribution builder
-#    Copyright (C) 2013 Juan Antonio Nache <ja@nache.net>
+#    Copyright (C) 2013-2014 Juan Antonio Nache <ja@nache.net>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 . $ORIG/scripts_functions/general.sh
 
 down_samba
-cd $RESOURCESDIR/samba
+cd $SAMBA_DIR
 
 echo_info "Setting up special env vars..."
 QEMUARMBIN=$(get_qemu_arm_path)

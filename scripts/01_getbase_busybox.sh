@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    PiNAS Linux Distribution builder
-#    Copyright (C) 2013 Juan Antonio Nache <ja@nache.net>
+#    Copyright (C) 2013-2014 Juan Antonio Nache <ja@nache.net>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ ORIG=$(cd $(dirname "$0")/../; pwd)
 
 down_busybox
 
-cd $RESOURCESDIR/busybox/
+cd $BUSYBOX_DIR
 sudo make -j $NUMCORES ARCH=arm CROSS_COMPILE=${CCPREFIX} clean
 cp $ORIG/config/busybox.conf ./.config
 
@@ -58,7 +58,7 @@ sudo mkdir -p $TARGETDIR/var/{opt,cache,lib/{misc,locate},local}
 sudo mkdir -p $TARGETDIR/{sys,dev,proc}
 
 echo_info "Installing busybox on $TARGETDIR"
-cd $RESOURCESDIR/busybox/
+cd $BUSYBOX_DIR
 sudo make ARCH=arm CROSS_COMPILE=${CCPREFIX} CONFIG_PREFIX=$TARGETDIR/ install
 echo_info "Setting busybox setuid..."
 sudo chown root.root $TARGETDIR/bin/busybox
