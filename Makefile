@@ -15,7 +15,8 @@ python:
 	scripts/03_getbase_python.sh
 samba:
 	scripts/04_getbase_samba.sh
-
+dropbear:
+	scripts/05_getbase_dropbear.sh
 
 kernel:
 	scripts/30_build_kernel.sh
@@ -37,6 +38,7 @@ help:
 	@echo  '  uclibc          - (02) Build uclibc libc libraries'
 	@echo  '  python          - (03) Build python, install on buildroot instead target'
 	@echo  '  samba           - (04) Build samba'
+	@echo  '  dropbear        - (05) Build dropbear'
 	@echo  '  kernel          - (30) Download linux src and build kernel/modules'
 	@echo  '  initrd          - (40) Create an initrd.gz'
 	@echo  '  rootfs          - (50) compress target with squashfs'
